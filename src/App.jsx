@@ -1,9 +1,7 @@
 
 import { useEffect, useState } from "react";
 
-import Navbar from "./components/common/Navbar";
-import Footer from "./components/common/Footer";
-
+// Public pages
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Services from "./pages/Services";
@@ -13,6 +11,11 @@ import Contact from "./pages/Contact";
 import ThankYou from "./pages/ThankYou";
 import NotFound from "./pages/NotFound";
 
+// Common components
+import Navbar from "./components/common/Navbar";
+import Footer from "./components/common/Footer";
+
+// Admin pages
 import AdminLogin from "./admin/AdminLogin";
 import Dashboard from "./admin/Dashboard";
 import Leads from "./admin/Leads";
@@ -20,23 +23,18 @@ import LeadDetail from "./admin/LeadDetail";
 import ManageGallery from "./admin/ManageGallery";
 import ManageServices from "./admin/ManageServices";
 import ManageSettings from "./admin/ManageSettings";
+import ManageTestimonials from "./admin/ManageTestimonials";
+
+const getCurrentPath = () => {
+  return window.location.pathname;
+};
 
 function App() {
-  const [currentPath, setCurrentPath] = useState(
-    window.location.pathname + window.location.search
-  );
-
-  const navigate = (path) => {
-    window.history.pushState({}, "", path);
-    setCurrentPath(path);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  const [pathname, setPathname] = useState(getCurrentPath());
 
   useEffect(() => {
     const handlePopState = () => {
-      setCurrentPath(
-        window.location.pathname + window.location.search
-      );
+      setPathname(getCurrentPath());
     };
 
     window.addEventListener("popstate", handlePopState);
@@ -46,9 +44,11 @@ function App() {
     };
   }, []);
 
-  const pathname = currentPath.split("?")[0];
-
-  const isAdmin = pathname.startsWith("/admin");
+  const navigate = (path) => {
+    window.history.pushState({}, "", path);
+    setPathname(getCurrentPath());
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const routes = {
     "/": <Home navigate={navigate} />,
@@ -65,21 +65,27 @@ function App() {
     "/admin/gallery": <ManageGallery navigate={navigate} />,
     "/admin/services": <ManageServices navigate={navigate} />,
     "/admin/settings": <ManageSettings navigate={navigate} />,
+    "/admin/testimonials": <ManageTestimonials navigate={navigate} />,
   };
 
-  let page;
+  const isAdmin = pathname.startsWith("/admin");
 
-  if (pathname.startsWith("/admin/leads/")) {
-    const leadId = pathname.split("/").pop();
+  let page = routes[pathname];
+
+  // Dynamic lead detail route
+  if (!page && pathname.startsWith("/admin/leads/")) {
+    const leadId = pathname.split("/admin/leads/")[1];
 
     page = (
       <LeadDetail
-        navigate={navigate}
         leadId={leadId}
+        navigate={navigate}
       />
     );
-  } else {
-    page = routes[pathname] || <NotFound navigate={navigate} />;
+  }
+
+  if (!page) {
+    page = <NotFound navigate={navigate} />;
   }
 
   return (

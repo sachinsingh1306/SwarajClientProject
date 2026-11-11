@@ -7,7 +7,8 @@ const DRIVE_FOLDERS = {
   Portrait: "YOUR_PORTRAIT_FOLDER_ID",
 };
 
-const shuffleImages = (images) => {
+// Shuffle images randomly using Fisher-Yates algorithm
+export const shuffleImages = (images) => {
   const shuffled = [...images];
 
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -22,6 +23,7 @@ const shuffleImages = (images) => {
   return shuffled;
 };
 
+// Fetch images from a Google Drive folder
 const fetchFolderImages = async (folderId, category) => {
   let images = [];
   let nextPageToken = "";
@@ -43,7 +45,7 @@ const fetchFolderImages = async (folderId, category) => {
     );
 
     if (!response.ok) {
-      throw new Error(`Google Drive error: ${response.status}`);
+      throw new Error("Unable to fetch Google Drive images.");
     }
 
     const data = await response.json();
@@ -62,6 +64,7 @@ const fetchFolderImages = async (folderId, category) => {
   return images;
 };
 
+// Fetch all portfolio categories
 export const fetchPortfolioImages = async () => {
   const categories = Object.entries(DRIVE_FOLDERS);
 
@@ -71,11 +74,10 @@ export const fetchPortfolioImages = async () => {
     )
   );
 
-  const allImages = results.flat();
-
-  return shuffleImages(allImages);
+  return shuffleImages(results.flat());
 };
 
+// Get images by category and shuffle them
 export const shuffleCategoryImages = (images, category) => {
   const filteredImages = images.filter(
     (image) => image.category === category

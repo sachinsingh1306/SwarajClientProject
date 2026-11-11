@@ -1,7 +1,6 @@
 
 import {
   createContext,
-  useCallback,
   useContext,
   useMemo,
 } from "react";
@@ -10,213 +9,171 @@ import useLocalStorage from "../hooks/useLocalStorage";
 
 const AppContext = createContext(null);
 
+const createId = () => {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+};
+
 const defaultServices = [
   {
     id: "service-1",
     title: "Wedding Photography",
-    description: "Beautiful memories of your special day.",
-    image: "https://images.unsplash.com/photo-1519741497674-611481863552",
-    price: "Contact for pricing",
+    description: "Beautiful moments captured forever.",
+    price: "",
+    category: "Wedding",
   },
   {
     id: "service-2",
-    title: "Portrait Photography",
-    description: "Professional portraits that tell your story.",
-    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb",
-    price: "Contact for pricing",
+    title: "Event Photography",
+    description: "Professional photography for special events.",
+    price: "",
+    category: "Event",
   },
   {
     id: "service-3",
-    title: "Event Photography",
-    description: "Capturing every memorable celebration.",
-    image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622",
-    price: "Contact for pricing",
-  },
-];
-
-const defaultGallery = [
-  {
-    id: "gallery-1",
-    title: "Wedding Moments",
-    category: "Wedding",
-    image: "https://images.unsplash.com/photo-1519741497674-611481863552",
-  },
-  {
-    id: "gallery-2",
-    title: "Portrait Session",
+    title: "Portrait Photography",
+    description: "Creative and professional portraits.",
+    price: "",
     category: "Portrait",
-    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb",
-  },
-  {
-    id: "gallery-3",
-    title: "Event Celebration",
-    category: "Event",
-    image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622",
-  },
-];
-
-const defaultTestimonials = [
-  {
-    id: "testimonial-1",
-    name: "Happy Client",
-    message: "Amazing photography and a wonderful experience!",
-    rating: 5,
   },
 ];
 
 const defaultSettings = {
-  siteName: "Swaraj Gupta Photography",
+  portfolioName: "Swaraj Gupta Photography",
   ownerName: "Swaraj Gupta",
   tagline: "Turning your beautiful moments into timeless memories.",
   email: "swarajgupta76@gmail.com",
   phone: "8840857530",
-  address: "Shubash Nagar, Near SVM, Gorakhpur, Uttar Pradesh 273001",
-  mapLink:
-    "https://www.google.com/maps/search/?api=1&query=Shubash+Nagar+Near+SVM+Gorakhpur+273001",
-  about:
-    "Welcome to Swaraj Gupta Photography. We capture your special moments with creativity, passion, and attention to detail.",
+  address: "Shubash Nagar Near SVM Gorakhpur 273001",
+  mapLink: "",
+  about: "We capture beautiful moments and turn them into timeless memories.",
   instagram: "",
   facebook: "",
   whatsapp: "918840857530",
 };
 
-function createId(prefix = "item") {
-  if (globalThis.crypto?.randomUUID) {
-    return `${prefix}-${globalThis.crypto.randomUUID()}`;
-  }
-
-  return `${prefix}-${Date.now()}-${Math.random()
-    .toString(36)
-    .slice(2, 9)}`;
-}
-
-export function AppProvider({ children }) {
+export const AppProvider = ({ children }) => {
   const [services, setServices] = useLocalStorage(
-    "photography_services",
+    "portfolio_services",
     defaultServices
   );
 
   const [gallery, setGallery] = useLocalStorage(
-    "photography_gallery",
-    defaultGallery
+    "portfolio_gallery",
+    []
   );
 
   const [leads, setLeads] = useLocalStorage(
-    "photography_leads",
+    "portfolio_leads",
     []
   );
 
   const [testimonials, setTestimonials] = useLocalStorage(
-    "photography_testimonials",
-    defaultTestimonials
+    "portfolio_testimonials",
+    []
   );
 
   const [settings, setSettings] = useLocalStorage(
-    "photography_settings",
+    "portfolio_settings",
     defaultSettings
   );
 
   // SERVICES
-  const addService = useCallback((service) => {
-    setServices((previous) => [
-      ...previous,
-      { ...service, id: createId("service") },
+  const addService = (service) => {
+    setServices((prev) => [
+      ...prev,
+      { ...service, id: service.id || createId() },
     ]);
-  }, [setServices]);
+  };
 
-  const updateService = useCallback((id, updates) => {
-    setServices((previous) =>
-      previous.map((item) =>
-        item.id === id ? { ...item, ...updates } : item
+  const updateService = (id, updatedService) => {
+    setServices((prev) =>
+      prev.map((service) =>
+        service.id === id
+          ? { ...service, ...updatedService }
+          : service
       )
     );
-  }, [setServices]);
+  };
 
-  const deleteService = useCallback((id) => {
-    setServices((previous) =>
-      previous.filter((item) => item.id !== id)
+  const deleteService = (id) => {
+    setServices((prev) =>
+      prev.filter((service) => service.id !== id)
     );
-  }, [setServices]);
+  };
 
   // GALLERY
-  const addGalleryImage = useCallback((image) => {
-    setGallery((previous) => [
-      ...previous,
-      { ...image, id: createId("gallery") },
+  const addGalleryImage = (image) => {
+    setGallery((prev) => [
+      ...prev,
+      { ...image, id: image.id || createId() },
     ]);
-  }, [setGallery]);
+  };
 
-  const updateGalleryImage = useCallback((id, updates) => {
-    setGallery((previous) =>
-      previous.map((item) =>
-        item.id === id ? { ...item, ...updates } : item
+  const deleteGalleryImage = (id) => {
+    setGallery((prev) =>
+      prev.filter((image) => image.id !== id)
+    );
+  };
+
+  // LEADS / ENQUIRIES
+  const addLead = (lead) => {
+    setLeads((prev) => [
+      ...prev,
+      { ...lead, id: lead.id || createId() },
+    ]);
+  };
+
+  const updateLeadStatus = (id, status) => {
+    setLeads((prev) =>
+      prev.map((lead) =>
+        lead.id === id
+          ? { ...lead, status }
+          : lead
       )
     );
-  }, [setGallery]);
+  };
 
-  const deleteGalleryImage = useCallback((id) => {
-    setGallery((previous) =>
-      previous.filter((item) => item.id !== id)
+  const deleteLead = (id) => {
+    setLeads((prev) =>
+      prev.filter((lead) => lead.id !== id)
     );
-  }, [setGallery]);
-
-  // LEADS
-  const addLead = useCallback((lead) => {
-    const newLead = {
-      ...lead,
-      id: createId("lead"),
-      status: "New",
-      createdAt: new Date().toISOString(),
-    };
-
-    setLeads((previous) => [newLead, ...previous]);
-
-    return newLead;
-  }, [setLeads]);
-
-  const updateLead = useCallback((id, updates) => {
-    setLeads((previous) =>
-      previous.map((item) =>
-        item.id === id ? { ...item, ...updates } : item
-      )
-    );
-  }, [setLeads]);
-
-  const deleteLead = useCallback((id) => {
-    setLeads((previous) =>
-      previous.filter((item) => item.id !== id)
-    );
-  }, [setLeads]);
+  };
 
   // TESTIMONIALS
-  const addTestimonial = useCallback((testimonial) => {
-    setTestimonials((previous) => [
-      ...previous,
-      { ...testimonial, id: createId("testimonial") },
+  const addTestimonial = (testimonial) => {
+    setTestimonials((prev) => [
+      ...prev,
+      { ...testimonial, id: testimonial.id || createId() },
     ]);
-  }, [setTestimonials]);
+  };
 
-  const updateTestimonial = useCallback((id, updates) => {
-    setTestimonials((previous) =>
-      previous.map((item) =>
-        item.id === id ? { ...item, ...updates } : item
+  const updateTestimonial = (id, updatedTestimonial) => {
+    setTestimonials((prev) =>
+      prev.map((testimonial) =>
+        testimonial.id === id
+          ? { ...testimonial, ...updatedTestimonial }
+          : testimonial
       )
     );
-  }, [setTestimonials]);
+  };
 
-  const deleteTestimonial = useCallback((id) => {
-    setTestimonials((previous) =>
-      previous.filter((item) => item.id !== id)
+  const deleteTestimonial = (id) => {
+    setTestimonials((prev) =>
+      prev.filter((testimonial) => testimonial.id !== id)
     );
-  }, [setTestimonials]);
+  };
 
   // WEBSITE SETTINGS
-  const updateSettings = useCallback((updates) => {
-    setSettings((previous) => ({
-      ...previous,
-      ...updates,
+  const updateSettings = (updatedSettings) => {
+    setSettings((prev) => ({
+      ...prev,
+      ...updatedSettings,
     }));
-  }, [setSettings]);
+  };
 
   const value = useMemo(
     () => ({
@@ -231,11 +188,10 @@ export function AppProvider({ children }) {
       deleteService,
 
       addGalleryImage,
-      updateGalleryImage,
       deleteGalleryImage,
 
       addLead,
-      updateLead,
+      updateLeadStatus,
       deleteLead,
 
       addTestimonial,
@@ -244,26 +200,7 @@ export function AppProvider({ children }) {
 
       updateSettings,
     }),
-    [
-      services,
-      gallery,
-      leads,
-      testimonials,
-      settings,
-      addService,
-      updateService,
-      deleteService,
-      addGalleryImage,
-      updateGalleryImage,
-      deleteGalleryImage,
-      addLead,
-      updateLead,
-      deleteLead,
-      addTestimonial,
-      updateTestimonial,
-      deleteTestimonial,
-      updateSettings,
-    ]
+    [services, gallery, leads, testimonials, settings]
   );
 
   return (
@@ -271,9 +208,9 @@ export function AppProvider({ children }) {
       {children}
     </AppContext.Provider>
   );
-}
+};
 
-export function useApp() {
+export const useApp = () => {
   const context = useContext(AppContext);
 
   if (!context) {
@@ -281,4 +218,4 @@ export function useApp() {
   }
 
   return context;
-}
+};

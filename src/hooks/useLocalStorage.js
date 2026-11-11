@@ -1,46 +1,70 @@
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-export default function useLocalStorage(key, initialValue) {
-  const [value, setValue] = useState(() => {
+const useLocalStorage = (key, initialValue) => {
+  const [storedValue, setStoredValue] = useState(() => {
     try {
-      const savedValue = localStorage.getItem(key);
+      const item = window.localStorage.getItem(key);
 
-      return savedValue !== null
-        ? JSON.parse(savedValue)
+      return item !== null
+        ? JSON.parse(item)
         : initialValue;
     } catch (error) {
-      console.error(`Error reading ${key}:`, error);
+      console.error(`Error reading localStorage key "${key}":`, error);
       return initialValue;
     }
   });
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(key, JSON.stringify(value));
-    } catch (error) {
-      console.error(`Error saving ${key}:`, error);
-    }
-  }, [key, value]);
+  const setValue = useCallback(
+    (value) => {
+      setStoredValue((currentValue) => {
+        const valueToStore =
+          value instanceof Function
+            ? value(currentValue)
+            : value;
 
-  // Keep data synchronized across browser tabs.
+        try {
+          window.localStorage.setItem(
+            key,
+            JSON.stringify(valueToStore)
+          );
+        } catch (error) {
+          console.error(
+            `Error saving localStorage key "${key}":`,
+            error
+          );
+        }
+
+        return valueToStore;
+      });
+    },
+    [key]
+  );
+
+  // Listen for changes made in other browser tabs
   useEffect(() => {
-    const handleStorage = (event) => {
+    const handleStorageChange = (event) => {
       if (event.key === key && event.newValue !== null) {
         try {
-          setValue(JSON.parse(event.newValue));
+          setStoredValue(JSON.parse(event.newValue));
         } catch (error) {
-          console.error(`Error syncing ${key}:`, error);
+          console.error("Error syncing localStorage:", error);
         }
+      }
+
+      if (event.key === key && event.newValue === null) {
+        setStoredValue(initialValue);
       }
     };
 
-    window.addEventListener("storage", handleStorage);
+    window.addEventListener("storage", handleStorageChange);
 
     return () => {
-      window.removeEventListener("storage", handleStorage);
+      window.removeEventListener("storage", handleStorageChange);
     };
-  }, [key]);
+  }, [key, initialValue]);
 
-  return [value, setValue];
-}
+  return [storedValue, setValue];
+};
+
+export default useLocalStorage;
