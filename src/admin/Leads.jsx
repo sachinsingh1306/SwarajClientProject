@@ -1,158 +1,170 @@
 
-import React, { useEffect, useState } from 'react';
+import { useMemo, useState } from "react";
+import { useApp } from "../context/AppContext";
 
-const Leads = ({ navigate }) => {
-  const [leads, setLeads] = useState([]);
-  const [search, setSearch] = useState('');
+function Leads({ navigate }) {
+  const { leads, deleteLead, updateLead } = useApp();
 
-  useEffect(() => {
-    if (!localStorage.getItem('adminLoggedIn')) {
-      navigate('/admin/login');
-      return;
-    }
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("All");
 
-    loadLeads();
-  }, []);
+  const filteredLeads = useMemo(() => {
+    return leads.filter((lead) => {
+      const query = search.toLowerCase();
 
-  const loadLeads = () => {
-    const savedLeads = JSON.parse(
-      localStorage.getItem('leads') || '[]'
-    );
+      const matchesSearch = [
+        lead.name,
+        lead.email,
+        lead.phone,
+        lead.service,
+      ].some((value) =>
+        String(value || "").toLowerCase().includes(query)
+      );
 
-    setLeads(savedLeads);
-  };
+      const matchesStatus =
+        statusFilter === "All" ||
+        (lead.status || "New") === statusFilter;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [leads, search, statusFilter]);
 
   const handleDelete = (id) => {
-    const confirmDelete = window.confirm(
-      'Are you sure you want to delete this lead?'
-    );
-
-    if (!confirmDelete) return;
-
-    const updatedLeads = leads.filter(
-      (lead) => String(lead.id) !== String(id)
-    );
-
-    localStorage.setItem(
-      'leads',
-      JSON.stringify(updatedLeads)
-    );
-
-    setLeads(updatedLeads);
+    if (window.confirm("Delete this enquiry?")) {
+      deleteLead(id);
+    }
   };
 
-  const filteredLeads = leads.filter((lead) => {
-    const searchText = search.toLowerCase();
-
-    return (
-      lead.name?.toLowerCase().includes(searchText) ||
-      lead.email?.toLowerCase().includes(searchText) ||
-      lead.phone?.toLowerCase().includes(searchText)
-    );
-  });
+  const handleStatusChange = (id, status) => {
+    updateLead(id, { status });
+  };
 
   return (
-    <div className="admin-leads">
-
-      <header className="leads-header">
+    <div className="admin-page">
+      <div className="admin-header">
         <div>
-          <h1>Manage Leads</h1>
-          <p>View and manage customer enquiries.</p>
+          <h1>Manage Enquiries</h1>
+          <p>Total enquiries: {leads.length}</p>
         </div>
 
         <button
-          onClick={() => navigate('/admin/dashboard')}
+          className="btn btn-outline"
+          onClick={() => navigate("/admin/dashboard")}
         >
           Back to Dashboard
         </button>
-      </header>
-
-      <div className="leads-summary">
-        <h3>Total Leads: {leads.length}</h3>
       </div>
 
-      <div className="leads-search">
-        <input
-          type="text"
-          placeholder="Search by name, email or phone..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
+      {/* Search and Filter */}
+      <section className="admin-card">
+        <div className="admin-filter-row">
+          <input
+            type="search"
+            placeholder="Search by name, email, phone or service..."
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
 
-      <div className="table-container">
+          <select
+            value={statusFilter}
+            onChange={(event) =>
+              setStatusFilter(event.target.value)
+            }
+          >
+            <option value="All">All Statuses</option>
+            <option value="New">New</option>
+            <option value="Contacted">Contacted</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
+      </section>
 
-        <table className="leads-table">
-
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Customer Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Service</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-
-          <tbody>
-
-            {filteredLeads.length > 0 ? (
-              filteredLeads.map((lead) => (
-                <tr key={lead.id}>
-
-                  <td>{lead.id}</td>
-
-                  <td>{lead.name}</td>
-
-                  <td>{lead.email}</td>
-
-                  <td>{lead.phone}</td>
-
-                  <td>{lead.service || 'N/A'}</td>
-
-                  <td>
-                    {lead.status || 'Pending'}
-                  </td>
-
-                  <td className="lead-buttons">
-
-                    <button
-                      onClick={() =>
-                        navigate(`/admin/leads/${lead.id}`)
-                      }
-                    >
-                      View
-                    </button>
-
-                    <button
-                      className="delete-button"
-                      onClick={() => handleDelete(lead.id)}
-                    >
-                      Delete
-                    </button>
-
-                  </td>
-
+      {/* Enquiry Table */}
+      <section className="admin-card">
+        {filteredLeads.length === 0 ? (
+          <div className="empty-state">
+            <h3>No Enquiries Found</h3>
+            <p>Try changing your search or filter.</p>
+          </div>
+        ) : (
+          <div className="admin-table-wrapper">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Service</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Actions</th>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="7">
-                  No leads found.
-                </td>
-              </tr>
-            )}
+              </thead>
 
-          </tbody>
+              <tbody>
+                {filteredLeads.map((lead) => (
+                  <tr key={lead.id}>
+                    <td>{lead.name}</td>
+                    <td>{lead.email}</td>
+                    <td>{lead.phone}</td>
+                    <td>{lead.service}</td>
 
-        </table>
+                    <td>
+                      <select
+                        value={lead.status || "New"}
+                        onChange={(event) =>
+                          handleStatusChange(
+                            lead.id,
+                            event.target.value
+                          )
+                        }
+                      >
+                        <option value="New">New</option>
+                        <option value="Contacted">Contacted</option>
+                        <option value="Completed">Completed</option>
+                      </select>
+                    </td>
 
-      </div>
+                    <td>
+                      {lead.createdAt
+                        ? new Date(
+                            lead.createdAt
+                          ).toLocaleDateString()
+                        : "—"}
+                    </td>
 
+                    <td>
+                      <div className="admin-item-actions">
+                        <button
+                          className="btn btn-outline"
+                          onClick={() =>
+                            navigate(
+                              `/admin/leads/${lead.id}`
+                            )
+                          }
+                        >
+                          View
+                        </button>
+
+                        <button
+                          className="btn btn-danger"
+                          onClick={() =>
+                            handleDelete(lead.id)
+                          }
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
     </div>
   );
-};
+}
 
 export default Leads;

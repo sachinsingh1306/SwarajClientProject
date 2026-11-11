@@ -1,55 +1,48 @@
 
-import React from 'react';
+import { useApp } from "../context/AppContext";
 
-const ThankYou = ({ navigate }) => {
+function ThankYou({ navigate }) {
+  const { settings } = useApp();
+
   return (
-    <div className="thank-you-page">
-
+    <section className="thank-you-page">
       <div className="thank-you-card">
+        <div className="thank-you-icon">✓</div>
 
-        {/* Success Icon */}
-        <div className="success-icon">
-          ✓
-        </div>
+        <span className="section-subtitle">
+          ENQUIRY RECEIVED
+        </span>
 
-        {/* Heading */}
         <h1>Thank You!</h1>
 
-        <h2>Your Enquiry Has Been Submitted</h2>
-
-        {/* Message */}
         <p>
-          Thank you for contacting PhotoStudio.
-          We have successfully received your enquiry.
+          Your enquiry has been saved successfully.
+          Thank you for contacting {settings.siteName}.
         </p>
 
         <p>
-          Our team will review your requirements
-          and get back to you as soon as possible.
+          We appreciate your interest and look forward
+          to discussing your photography requirements.
         </p>
 
-        {/* Actions */}
         <div className="thank-you-actions">
-
           <button
-            onClick={() => navigate('/')}
+            className="btn btn-primary"
+            onClick={() => navigate("/")}
           >
             Back to Home
           </button>
 
           <button
-            className="secondary-button"
-            onClick={() => navigate('/portfolio')}
+            className="btn btn-outline"
+            onClick={() => navigate("/portfolio")}
           >
             Explore Portfolio
           </button>
-
         </div>
-
       </div>
-
-    </div>
+    </section>
   );
-};
+}
 
 export default ThankYou;

@@ -1,223 +1,265 @@
 
-import React, { useState } from 'react';
+import { useState } from "react";
+import { useApp } from "../../context/AppContext";
 
-const EnquiryForm = ({ navigate }) => {
+function EnquiryForm({ navigate }) {
+  const { addLead, services, settings } = useApp();
+
+  const params = new URLSearchParams(window.location.search);
+  const selectedService = params.get("service") || "";
+
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    service: '',
-    message: ''
+    name: "",
+    email: "",
+    phone: "",
+    service: selectedService,
+    message: "",
   });
 
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [success, setSuccess] = useState("");
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  const handleChange = (event) => {
+    const { name, value } = event.target;
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
+    setFormData((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
+
+    setErrors((previous) => ({
+      ...previous,
+      [name]: "",
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setError('');
+  const validateForm = () => {
+    const newErrors = {};
 
-    const { name, email, phone, service, message } = formData;
-
-    if (!name.trim() || !email.trim() || !phone.trim() || !service || !message.trim()) {
-      setError('Please fill in all fields.');
-      return;
+    if (!formData.name.trim()) {
+      newErrors.name = "Please enter your name.";
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailRegex.test(email)) {
-      setError('Please enter a valid email address.');
-      return;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email.";
     }
 
-    const phoneRegex = /^[0-9]{10}$/;
-
-    if (!phoneRegex.test(phone)) {
-      setError('Please enter a valid 10-digit phone number.');
-      return;
+    if (!/^[0-9+\-\s()]{7,15}$/.test(formData.phone)) {
+      newErrors.phone = "Please enter a valid phone number.";
     }
 
-    setLoading(true);
-
-    try {
-      const savedLeads = JSON.parse(
-        localStorage.getItem('leads') || '[]'
-      );
-
-      const newLead = {
-        id: Date.now(),
-        name: name.trim(),
-        email: email.trim(),
-        phone: phone.trim(),
-        service,
-        message: message.trim(),
-        status: 'Pending',
-        date: new Date().toLocaleDateString()
-      };
-
-      const updatedLeads = [...savedLeads, newLead];
-
-      localStorage.setItem(
-        'leads',
-        JSON.stringify(updatedLeads)
-      );
-
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        service: '',
-        message: ''
-      });
-
-      if (navigate) {
-        navigate('/thank-you');
-      }
-
-    } catch (err) {
-      setError('Unable to submit enquiry. Please try again.');
-    } finally {
-      setLoading(false);
+    if (!formData.service) {
+      newErrors.service = "Please select a service.";
     }
+
+    if (!formData.message.trim()) {
+      newErrors.message = "Please enter your message.";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
   };
 
+  
+const handleSubmit = (e) => {
+  e.preventDefault();
+
+  // Save the enquiry in localStorage through AppContext
+  const newLead = {
+    id: crypto.randomUUID(),
+    name: formData.name,
+    phone: formData.phone,
+    email: formData.email,
+    service: formData.service,
+    message: formData.message,
+    status: "New",
+    createdAt: new Date().toISOString(),
+  };
+
+  addLead(newLead);
+
+  // Client's WhatsApp number
+  const clientWhatsApp = String(
+    settings.whatsapp || "918840857530"
+  ).replace(/\D/g, "");
+
+  // Prepare enquiry message
+  const whatsappMessage = `
+Hello Swaraj Gupta Photography!
+
+I would like to enquire about your photography services.
+
+Customer Details:
+Name: ${formData.name}
+Phone: ${formData.phone}
+Email: ${formData.email}
+Service: ${formData.service}
+
+Message:
+${formData.message}
+
+Thank you!
+  `.trim();
+
+  // Open WhatsApp with pre-filled enquiry
+  const whatsappURL =
+    `https://wa.me/${clientWhatsApp}?text=${encodeURIComponent(whatsappMessage)}`;
+
+  window.open(whatsappURL, "_blank", "noopener,noreferrer");
+
+  // Show success message or navigate to thank-you page
+  navigate("/thank-you");
+};
+
+
+  const whatsappNumber = (settings.whatsapp || "")
+    .replace(/\D/g, "");
+
+  const whatsappLink = whatsappNumber
+    ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
+        "Hello, I would like to enquire about your photography services."
+      )}`
+    : "";
+
   return (
-    <section className="enquiry-section">
+    <div className="enquiry-form-wrapper">
+      <form className="enquiry-form" onSubmit={handleSubmit}>
+        <h2>Send Us an Enquiry</h2>
 
-      <div className="enquiry-container">
+        <p>
+          Tell us about your photography requirements.
+          We'll be happy to hear from you.
+        </p>
 
-        <div className="enquiry-heading">
-          <h2>Get In Touch</h2>
+        <div className="form-group">
+          <label htmlFor="name">Full Name *</label>
 
-          <p>
-            Tell us about your photography requirements.
-            We would love to hear from you!
-          </p>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Enter your full name"
+          />
+
+          {errors.name && (
+            <small className="error-message">
+              {errors.name}
+            </small>
+          )}
         </div>
 
-        {error && (
-          <div className="error-message">
-            {error}
-          </div>
-        )}
+        <div className="form-group">
+          <label htmlFor="email">Email Address *</label>
 
-        <form
-          className="enquiry-form"
-          onSubmit={handleSubmit}
-        >
+          <input
+            id="email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Enter your email"
+          />
 
-          <div className="form-group">
-            <label htmlFor="name">Full Name</label>
+          {errors.email && (
+            <small className="error-message">
+              {errors.email}
+            </small>
+          )}
+        </div>
 
-            <input
-              id="name"
-              type="text"
-              name="name"
-              placeholder="Enter your full name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
-          </div>
+        <div className="form-group">
+          <label htmlFor="phone">Phone Number *</label>
 
-          <div className="form-group">
-            <label htmlFor="email">Email Address</label>
+          <input
+            id="phone"
+            name="phone"
+            type="tel"
+            value={formData.phone}
+            onChange={handleChange}
+            placeholder="Enter your phone number"
+          />
 
-            <input
-              id="email"
-              type="email"
-              name="email"
-              placeholder="Enter your email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
+          {errors.phone && (
+            <small className="error-message">
+              {errors.phone}
+            </small>
+          )}
+        </div>
 
-          <div className="form-group">
-            <label htmlFor="phone">Phone Number</label>
+        <div className="form-group">
+          <label htmlFor="service">Select Service *</label>
 
-            <input
-              id="phone"
-              type="tel"
-              name="phone"
-              placeholder="Enter 10-digit phone number"
-              value={formData.phone}
-              onChange={handleChange}
-              maxLength="10"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="service">Select Service</label>
-
-            <select
-              id="service"
-              name="service"
-              value={formData.service}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select a service</option>
-              <option value="Wedding Photography">
-                Wedding Photography
-              </option>
-              <option value="Pre Wedding Photography">
-                Pre Wedding Photography
-              </option>
-              <option value="Portrait Photography">
-                Portrait Photography
-              </option>
-              <option value="Event Photography">
-                Event Photography
-              </option>
-              <option value="Product Photography">
-                Product Photography
-              </option>
-              <option value="Other">
-                Other
-              </option>
-            </select>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="message">Your Message</label>
-
-            <textarea
-              id="message"
-              name="message"
-              placeholder="Tell us about your requirements..."
-              value={formData.message}
-              onChange={handleChange}
-              rows="5"
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
+          <select
+            id="service"
+            name="service"
+            value={formData.service}
+            onChange={handleChange}
           >
-            {loading ? 'Submitting...' : 'Submit Enquiry'}
-          </button>
+            <option value="">Choose a service</option>
 
-        </form>
+            {services.map((service) => (
+              <option
+                key={service.id}
+                value={service.title}
+              >
+                {service.title}
+              </option>
+            ))}
+          </select>
 
-      </div>
+          {errors.service && (
+            <small className="error-message">
+              {errors.service}
+            </small>
+          )}
+        </div>
 
-    </section>
+        <div className="form-group">
+          <label htmlFor="message">Your Message *</label>
+
+          <textarea
+            id="message"
+            name="message"
+            rows="5"
+            value={formData.message}
+            onChange={handleChange}
+            placeholder="Tell us about your event or requirements"
+          />
+
+          {errors.message && (
+            <small className="error-message">
+              {errors.message}
+            </small>
+          )}
+        </div>
+
+        <button
+          type="submit"
+          className="btn btn-primary"
+        >
+          Submit Enquiry
+        </button>
+
+        {success && (
+          <p className="success-message">{success}</p>
+        )}
+      </form>
+
+      {whatsappLink && (
+        <a
+          href={whatsappLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="whatsapp-link"
+        >
+          Chat with us on WhatsApp
+        </a>
+      )}
+    </div>
   );
-};
+}
 
 export default EnquiryForm;

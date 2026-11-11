@@ -1,223 +1,127 @@
 
-import React, { useEffect, useState } from 'react';
+import { useApp } from "../context/AppContext";
 
-const defaultServices = [
-  {
-    id: 1,
-    name: 'Wedding Photography',
-    icon: '💍',
-    description:
-      'Capture every beautiful moment of your wedding day with professional photography.',
-    price: '25000'
-  },
-  {
-    id: 2,
-    name: 'Pre Wedding Photography',
-    icon: '❤️',
-    description:
-      'Beautiful and romantic pre-wedding photoshoots with creative concepts.',
-    price: '15000'
-  },
-  {
-    id: 3,
-    name: 'Portrait Photography',
-    icon: '📸',
-    description:
-      'Professional portraits that capture your personality and style.',
-    price: '5000'
-  },
-  {
-    id: 4,
-    name: 'Event Photography',
-    icon: '🎉',
-    description:
-      'Capture memorable moments from birthdays, parties and special events.',
-    price: '10000'
-  },
-  {
-    id: 5,
-    name: 'Product Photography',
-    icon: '📷',
-    description:
-      'High-quality product images for businesses, brands and online stores.',
-    price: '7000'
-  },
-  {
-    id: 6,
-    name: 'Fashion Photography',
-    icon: '✨',
-    description:
-      'Creative fashion photography for portfolios, brands and models.',
-    price: '12000'
-  }
-];
-
-const Services = ({ navigate }) => {
-  const [services, setServices] = useState(defaultServices);
-
-  useEffect(() => {
-    try {
-      const savedServices = JSON.parse(
-        localStorage.getItem('services') || '[]'
-      );
-
-      if (savedServices.length > 0) {
-        setServices(
-          savedServices.map((service) => ({
-            ...service,
-            icon: service.icon || '📸'
-          }))
-        );
-      }
-    } catch (error) {
-      console.error('Unable to load services:', error);
-    }
-  }, []);
+function Services({ navigate }) {
+  const { services, settings } = useApp();
 
   return (
     <div className="services-page">
-
-      {/* Services Hero */}
-      <section className="services-hero">
-
-        <div className="services-hero-content">
-
-          <span>WHAT WE OFFER</span>
+      {/* Page Hero */}
+      <section className="page-hero">
+        <div className="container">
+          <span className="section-subtitle">
+            WHAT WE OFFER
+          </span>
 
           <h1>Our Photography Services</h1>
 
           <p>
-            Professional photography services to capture
-            your special moments and beautiful memories.
+            {settings.tagline ||
+              "Professional photography for your special moments."}
+          </p>
+        </div>
+      </section>
+
+      {/* Services */}
+      <section className="services-section section-padding">
+        <div className="container">
+          <div className="section-heading">
+            <span className="section-subtitle">
+              OUR EXPERTISE
+            </span>
+
+            <h2>Photography Services</h2>
+
+            <p>
+              Explore our photography services and choose the
+              perfect experience for your special occasion.
+            </p>
+          </div>
+
+          {services.length === 0 ? (
+            <div className="empty-state">
+              <h3>Services Coming Soon</h3>
+
+              <p>
+                We are updating our photography services.
+                Please check back soon.
+              </p>
+
+              <button
+                className="btn btn-primary"
+                onClick={() => navigate("/contact")}
+              >
+                Contact Us
+              </button>
+            </div>
+          ) : (
+            <div className="services-grid">
+              {services.map((service) => (
+                <article
+                  className="service-card"
+                  key={service.id}
+                >
+                  <div className="service-image">
+                    <img
+                      src={service.image}
+                      alt={service.title}
+                      loading="lazy"
+                    />
+                  </div>
+
+                  <div className="service-content">
+                    <h3>{service.title}</h3>
+
+                    <p>{service.description}</p>
+
+                    {service.price && (
+                      <span className="service-price">
+                        {service.price}
+                      </span>
+                    )}
+
+                    <button
+                      className="btn btn-primary"
+                      onClick={() =>
+                        navigate(
+                          `/contact?service=${encodeURIComponent(
+                            service.title
+                          )}`
+                        )
+                      }
+                    >
+                      Enquire Now
+                    </button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Call to Action */}
+      <section className="services-cta">
+        <div className="container">
+          <h2>
+            Let's Capture Your Beautiful Moments
+          </h2>
+
+          <p>
+            Contact {settings.ownerName || "our studio"} to
+            discuss your photography requirements.
           </p>
 
           <button
-            onClick={() => navigate('/contact')}
+            className="btn btn-primary"
+            onClick={() => navigate("/contact")}
           >
-            Book Your Session
+            Get In Touch
           </button>
-
         </div>
-
       </section>
-
-      {/* Services List */}
-      <section className="services-section">
-
-        <div className="section-heading">
-
-          <span>OUR EXPERTISE</span>
-
-          <h2>Explore Our Services</h2>
-
-          <p>
-            Choose the perfect photography service
-            for your special occasion.
-          </p>
-
-        </div>
-
-        <div className="services-page-grid">
-
-          {services.map((service) => (
-
-            <div
-              className="services-page-card"
-              key={service.id}
-            >
-
-              <div className="service-icon">
-                {service.icon}
-              </div>
-
-              <h3>{service.name}</h3>
-
-              <p>{service.description}</p>
-
-              {service.price && (
-                <div className="service-price">
-                  <span>Starting From</span>
-
-                  <h4>
-                    ₹{Number(service.price).toLocaleString('en-IN')}
-                  </h4>
-                </div>
-              )}
-
-              <button
-                onClick={() => navigate('/contact')}
-              >
-                Book This Service
-              </button>
-
-            </div>
-
-          ))}
-
-        </div>
-
-      </section>
-
-      {/* Why Choose Us */}
-      <section className="services-benefits">
-
-        <div className="section-heading">
-
-          <span>WHY CHOOSE US</span>
-
-          <h2>Our Promise To You</h2>
-
-        </div>
-
-        <div className="benefits-grid">
-
-          <div className="benefit-card">
-            <span>📸</span>
-            <h3>Professional Quality</h3>
-            <p>High-quality photographs with attention to detail.</p>
-          </div>
-
-          <div className="benefit-card">
-            <span>✨</span>
-            <h3>Creative Concepts</h3>
-            <p>Unique photography ideas for every occasion.</p>
-          </div>
-
-          <div className="benefit-card">
-            <span>🤝</span>
-            <h3>Customer Satisfaction</h3>
-            <p>Personalized service based on your requirements.</p>
-          </div>
-
-          <div className="benefit-card">
-            <span>❤️</span>
-            <h3>Beautiful Memories</h3>
-            <p>Moments captured to cherish for a lifetime.</p>
-          </div>
-
-        </div>
-
-      </section>
-
-      {/* Final CTA */}
-      <section className="services-cta">
-
-        <h2>Ready To Capture Your Story?</h2>
-
-        <p>
-          Contact us today to discuss your photography needs.
-        </p>
-
-        <button
-          onClick={() => navigate('/contact')}
-        >
-          Get In Touch
-        </button>
-
-      </section>
-
     </div>
   );
-};
+}
 
 export default Services;

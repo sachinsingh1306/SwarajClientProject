@@ -1,122 +1,72 @@
 
-import React, { useEffect } from 'react';
-
-const ImageLightbox = ({
+function ImageLightbox({
   images = [],
-  selectedImage,
+  currentIndex = 0,
   onClose,
-  onNext,
-  onPrevious
-}) => {
+  onNavigate,
+  onViewDetails,
+}) {
+  const image = images[currentIndex];
 
-  useEffect(() => {
-    if (!selectedImage) return;
+  if (!image) return null;
 
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') {
-        onClose?.();
-      }
+  const handleKeyDown = (event) => {
+    if (event.key === "Escape") {
+      onClose();
+    }
 
-      if (e.key === 'ArrowRight') {
-        onNext?.();
-      }
+    if (event.key === "ArrowRight") {
+      onNavigate(1);
+    }
 
-      if (e.key === 'ArrowLeft') {
-        onPrevious?.();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-
-    document.body.style.overflow = 'hidden';
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = '';
-    };
-  }, [selectedImage, onClose, onNext, onPrevious]);
-
-  if (!selectedImage) {
-    return null;
-  }
-
-  const currentIndex = images.findIndex(
-    (image) => image.id === selectedImage.id
-  );
+    if (event.key === "ArrowLeft") {
+      onNavigate(-1);
+    }
+  };
 
   return (
     <div
-      className="lightbox-overlay"
+      className="lightbox"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Image preview"
       onClick={onClose}
+      onKeyDown={handleKeyDown}
+      tabIndex={-1}
     >
+      <button
+        className="lightbox-close"
+        onClick={onClose}
+        type="button"
+        aria-label="Close image preview"
+      >
+        ×
+      </button>
 
       <div
-        className="lightbox-container"
-        onClick={(e) => e.stopPropagation()}
+        className="lightbox-content"
+        onClick={(event) => event.stopPropagation()}
       >
+        <img
+          src={image.image}
+          alt={image.title || "Photography"}
+        />
 
-        {/* Close Button */}
-        <button
-          className="lightbox-close"
-          onClick={onClose}
-          aria-label="Close image preview"
-        >
-          ✕
-        </button>
+        <div className="lightbox-info">
+          <h3>{image.title}</h3>
+          <p>{image.category}</p>
 
-        {/* Previous Button */}
-        {images.length > 1 && (
           <button
-            className="lightbox-previous"
-            onClick={onPrevious}
-            aria-label="Previous image"
+            className="btn btn-primary"
+            onClick={onViewDetails}
+            type="button"
           >
-            &#10094;
+            View Details
           </button>
-        )}
-
-        {/* Selected Image */}
-        <div className="lightbox-image-wrapper">
-
-          <img
-            src={selectedImage.image}
-            alt={selectedImage.title || selectedImage.name || 'Portfolio image'}
-            className="lightbox-image"
-          />
-
-          <div className="lightbox-caption">
-
-            <h3>
-              {selectedImage.title || selectedImage.name}
-            </h3>
-
-            <p>
-              {selectedImage.category || 'Photography'}
-            </p>
-
-            <span>
-              {currentIndex + 1} / {images.length}
-            </span>
-
-          </div>
-
         </div>
-
-        {/* Next Button */}
-        {images.length > 1 && (
-          <button
-            className="lightbox-next"
-            onClick={onNext}
-            aria-label="Next image"
-          >
-            &#10095;
-          </button>
-        )}
-
       </div>
-
     </div>
   );
-};
+}
 
 export default ImageLightbox;

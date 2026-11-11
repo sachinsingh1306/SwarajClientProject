@@ -1,58 +1,49 @@
 
-import React from 'react';
+import { useApp } from "../../context/AppContext";
 
-const Hero = ({ navigate }) => {
+function Hero({ navigate }) {
+  const { settings } = useApp();
+
   return (
     <section className="hero-section">
+      <div className="hero-overlay"></div>
 
-      <div className="hero-background">
+      <div className="container hero-container">
+        <div className="hero-content">
+          <span className="hero-subtitle">
+            WELCOME TO {settings.siteName?.toUpperCase()}
+          </span>
 
-        <div className="hero-overlay">
+          <h1>
+            Every Picture
+            <br />
+            Tells a Beautiful Story
+          </h1>
 
-          <div className="hero-content">
+          <p>
+            {settings.tagline ||
+              "Capturing beautiful moments and turning them into timeless memories."}
+          </p>
 
-            <span className="hero-subtitle">
-              CAPTURING MOMENTS, CREATING MEMORIES
-            </span>
+          <div className="hero-buttons">
+            <button
+              className="btn btn-primary"
+              onClick={() => navigate("/portfolio")}
+            >
+              Explore Portfolio
+            </button>
 
-            <h1>
-              Every Picture Tells
-              <br />
-              A Beautiful Story
-            </h1>
-
-            <p>
-              We capture your special moments with creativity,
-              passion and perfection. Let us turn your memories
-              into timeless photographs.
-            </p>
-
-            <div className="hero-buttons">
-
-              <button
-                className="hero-primary-btn"
-                onClick={() => navigate('/portfolio')}
-              >
-                Explore Portfolio
-              </button>
-
-              <button
-                className="hero-secondary-btn"
-                onClick={() => navigate('/contact')}
-              >
-                Book a Session
-              </button>
-
-            </div>
-
+            <button
+              className="btn btn-outline"
+              onClick={() => navigate("/contact")}
+            >
+              Book a Session
+            </button>
           </div>
-
         </div>
-
       </div>
-
     </section>
   );
-};
+}
 
 export default Hero;

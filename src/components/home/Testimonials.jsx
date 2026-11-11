@@ -1,89 +1,52 @@
 
-import React from 'react';
+import { useApp } from "../../context/AppContext";
 
-const testimonials = [
-  {
-    id: 1,
-    name: 'Rahul Sharma',
-    role: 'Wedding Client',
-    rating: 5,
-    message:
-      'Amazing photography! They captured every beautiful moment of our wedding. The pictures were absolutely stunning.'
-  },
-  {
-    id: 2,
-    name: 'Priya Verma',
-    role: 'Pre-Wedding Client',
-    rating: 5,
-    message:
-      'We had a wonderful experience. The photographer was very professional, creative and friendly.'
-  },
-  {
-    id: 3,
-    name: 'Amit Kumar',
-    role: 'Event Client',
-    rating: 5,
-    message:
-      'Excellent service and outstanding picture quality. Highly recommended for anyone looking for professional photography.'
-  }
-];
+function Testimonials() {
+  const { testimonials } = useApp();
 
-const Testimonials = () => {
   return (
-    <section className="testimonials-section">
+    <section className="testimonials-section section-padding">
+      <div className="container">
+        <div className="section-heading">
+          <span className="section-subtitle">
+            CLIENT EXPERIENCES
+          </span>
 
-      <div className="section-heading">
+          <h2>What Our Clients Say</h2>
 
-        <span>CLIENT REVIEWS</span>
+          <p>
+            Real experiences from people who trusted us
+            with their special moments.
+          </p>
+        </div>
 
-        <h2>What Our Clients Say</h2>
-
-        <p>
-          Our clients' happiness is our biggest achievement.
-          Here is what they say about our work.
-        </p>
-
-      </div>
-
-      <div className="testimonials-grid">
-
-        {testimonials.map((item) => (
-
-          <div
-            className="testimonial-card"
-            key={item.id}
-          >
-
-            <div className="testimonial-rating">
-              {'★'.repeat(item.rating)}
-            </div>
-
-            <p className="testimonial-message">
-              "{item.message}"
-            </p>
-
-            <div className="testimonial-author">
-
-              <div className="testimonial-avatar">
-                {item.name.charAt(0)}
-              </div>
-
-              <div>
-                <h3>{item.name}</h3>
-
-                <span>{item.role}</span>
-              </div>
-
-            </div>
-
+        {testimonials.length === 0 ? (
+          <div className="empty-state">
+            <p>Client reviews will appear here soon.</p>
           </div>
+        ) : (
+          <div className="testimonials-grid">
+            {testimonials.map((item) => (
+              <article
+                className="testimonial-card"
+                key={item.id}
+              >
+                <div className="testimonial-rating">
+                  {"★".repeat(
+                    Math.max(0, Math.min(5, Number(item.rating) || 0))
+                  )}
+                </div>
 
-        ))}
+                <p>"{item.message}"</p>
 
+                <h3>{item.name}</h3>
+              </article>
+            ))}
+          </div>
+        )}
       </div>
-
     </section>
   );
-};
+}
 
 export default Testimonials;

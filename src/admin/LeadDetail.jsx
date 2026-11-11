@@ -1,81 +1,57 @@
 
-import React, { useEffect, useState } from 'react';
+import { useApp } from "../context/AppContext";
 
-const LeadDetail = ({ leadId, navigate }) => {
-  const [lead, setLead] = useState(null);
+function LeadDetail({ navigate, leadId }) {
+  const { leads, updateLead, deleteLead } = useApp();
 
-  useEffect(() => {
-    const savedLeads = JSON.parse(
-      localStorage.getItem('leads') || '[]'
-    );
-
-    const selectedLead = savedLeads.find(
-      (item) => String(item.id) === String(leadId)
-    );
-
-    setLead(selectedLead || null);
-  }, [leadId]);
-
-  const handleDelete = () => {
-    const confirmDelete = window.confirm(
-      'Are you sure you want to delete this enquiry?'
-    );
-
-    if (!confirmDelete) return;
-
-    const savedLeads = JSON.parse(
-      localStorage.getItem('leads') || '[]'
-    );
-
-    const updatedLeads = savedLeads.filter(
-      (item) => String(item.id) !== String(leadId)
-    );
-
-    localStorage.setItem(
-      'leads',
-      JSON.stringify(updatedLeads)
-    );
-
-    navigate('/admin/leads');
-  };
-
-  if (!localStorage.getItem('adminLoggedIn')) {
-    navigate('/admin/login');
-    return null;
-  }
+  const lead = leads.find(
+    (item) => item.id === leadId
+  );
 
   if (!lead) {
     return (
-      <div className="lead-detail">
-        <h2>Lead Not Found</h2>
+      <div className="admin-page">
+        <h2>Enquiry Not Found</h2>
 
-        <button onClick={() => navigate('/admin/leads')}>
-          Back to Leads
+        <p>This enquiry may have been deleted.</p>
+
+        <button
+          className="btn btn-primary"
+          onClick={() => navigate("/admin/leads")}
+        >
+          Back to Enquiries
         </button>
       </div>
     );
   }
 
+  const handleDelete = () => {
+    if (window.confirm("Delete this enquiry permanently?")) {
+      deleteLead(lead.id);
+      navigate("/admin/leads");
+    }
+  };
+
   return (
-    <div className="lead-detail">
+    <div className="admin-page">
+      <div className="admin-header">
+        <div>
+          <h1>Enquiry Details</h1>
+          <p>View and manage customer enquiry.</p>
+        </div>
 
-      <div className="lead-header">
-        <h1>Enquiry Details</h1>
-
-        <button onClick={() => navigate('/admin/leads')}>
-          Back to Leads
+        <button
+          className="btn btn-outline"
+          onClick={() => navigate("/admin/leads")}
+        >
+          Back to Enquiries
         </button>
       </div>
 
-      <div className="lead-card">
+      <section className="admin-card lead-detail-card">
+        <h2>{lead.name}</h2>
 
-        <h2>Customer Information</h2>
-
-        <div className="lead-info">
-          <p>
-            <strong>Name:</strong> {lead.name}
-          </p>
-
+        <div className="lead-detail-info">
           <p>
             <strong>Email:</strong> {lead.email}
           </p>
@@ -85,49 +61,66 @@ const LeadDetail = ({ leadId, navigate }) => {
           </p>
 
           <p>
-            <strong>Service:</strong> {lead.service || 'Not specified'}
+            <strong>Service:</strong> {lead.service}
           </p>
 
           <p>
-            <strong>Date:</strong> {lead.date || 'Not available'}
+            <strong>Date:</strong>{" "}
+            {lead.createdAt
+              ? new Date(lead.createdAt).toLocaleString()
+              : "—"}
           </p>
 
           <p>
-            <strong>Status:</strong> {lead.status || 'Pending'}
+            <strong>Message:</strong>
           </p>
+
+          <p>{lead.message}</p>
         </div>
 
-        <div className="lead-message">
-          <h3>Customer Message</h3>
+        <div className="form-group">
+          <label htmlFor="lead-status">Enquiry Status</label>
 
-          <p>
-            {lead.message || 'No message provided.'}
-          </p>
+          <select
+            id="lead-status"
+            value={lead.status || "New"}
+            onChange={(event) =>
+              updateLead(lead.id, {
+                status: event.target.value,
+              })
+            }
+          >
+            <option value="New">New</option>
+            <option value="Contacted">Contacted</option>
+            <option value="Completed">Completed</option>
+          </select>
         </div>
 
-        <div className="lead-actions">
-
-          <a href={`mailto:${lead.email}`}>
+        <div className="admin-item-actions">
+          <a
+            className="btn btn-outline"
+            href={`mailto:${lead.email}`}
+          >
             Reply by Email
           </a>
 
-          <a href={`tel:${lead.phone}`}>
+          <a
+            className="btn btn-outline"
+            href={`tel:${lead.phone}`}
+          >
             Call Customer
           </a>
 
           <button
-            className="delete-button"
+            className="btn btn-danger"
             onClick={handleDelete}
           >
             Delete Enquiry
           </button>
-
         </div>
-
-      </div>
-
+      </section>
     </div>
   );
-};
+}
 
 export default LeadDetail;

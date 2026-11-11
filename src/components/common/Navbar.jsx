@@ -1,69 +1,64 @@
 
-import React, { useState } from 'react';
+import { useState } from "react";
+import { useApp } from "../../context/AppContext";
 
 const Navbar = ({ navigate }) => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { settings } = useApp();
 
-  const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'About', path: '/about' },
-    { name: 'Services', path: '/services' },
-    { name: 'Portfolio', path: '/portfolio' },
-    { name: 'Contact', path: '/contact' }
+  const links = [
+    { label: "Home", path: "/" },
+    { label: "About", path: "/about" },
+    { label: "Services", path: "/services" },
+    { label: "Portfolio", path: "/portfolio" },
+    { label: "Contact", path: "/contact" },
   ];
 
   const handleNavigation = (path) => {
     navigate(path);
     setMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
-    <header className="site-header">
-
+    <header className="navbar">
       <div className="navbar-container">
-
-        {/* Logo */}
-        <div
-          className="navbar-logo"
-          onClick={() => handleNavigation('/')}
+        <button
+          className="navbar-brand"
+          onClick={() => handleNavigation("/")}
+          aria-label="Go to homepage"
         >
-          <h2>PhotoStudio</h2>
-        </div>
+          {settings?.portfolioName || "Swaraj Gupta Photography"}
+        </button>
 
-        {/* Mobile Menu Button */}
         <button
           className="menu-toggle"
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label="Toggle navigation menu"
           aria-expanded={menuOpen}
         >
-          {menuOpen ? '✕' : '☰'}
+          {menuOpen ? "✕" : "☰"}
         </button>
 
-        {/* Navigation Links */}
-        <nav className={`navbar-menu ${menuOpen ? 'active' : ''}`}>
-
-          {navLinks.map((link) => (
+        <nav className={`navbar-links ${menuOpen ? "active" : ""}`}>
+          {links.map((link) => (
             <button
               key={link.path}
               className="nav-link"
               onClick={() => handleNavigation(link.path)}
             >
-              {link.name}
+              {link.label}
             </button>
           ))}
 
           <button
-            className="navbar-contact-btn"
-            onClick={() => handleNavigation('/contact')}
+            className="nav-contact-btn"
+            onClick={() => handleNavigation("/contact")}
           >
-            Book Now
+            Book a Session
           </button>
-
         </nav>
-
       </div>
-
     </header>
   );
 };

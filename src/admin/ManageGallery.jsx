@@ -1,187 +1,259 @@
 
-import React, { useEffect, useState } from 'react';
+import { useRef, useState } from "react";
+import { useApp } from "../context/AppContext";
 
-const ManageGallery = ({ navigate }) => {
-  const [images, setImages] = useState([]);
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [preview, setPreview] = useState('');
+const MAX_FILE_SIZE = 1.5 * 1024 * 1024;
 
-  useEffect(() => {
-    if (!localStorage.getItem('adminLoggedIn')) {
-      navigate('/admin/login');
-      return;
-    }
+function ManageGallery({ navigate }) {
+  const {
+    gallery,
+    addGalleryImage,
+    deleteGalleryImage,
+  } = useApp();
 
-    loadImages();
-  }, []);
+  const fileInputRef = useRef(null);
 
-  const loadImages = () => {
-    const savedImages = JSON.parse(
-      localStorage.getItem('gallery') || '[]'
-    );
+  const [formData, setFormData] = useState({
+    title: "",
+    category: "Wedding",
+  });
 
-    setImages(savedImages);
+  const [preview, setPreview] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setFormData((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const handleFileChange = (event) => {
+    const file = event.target.files?.[0];
+
+    setError("");
+    setPreview("");
 
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      alert('Please select a valid image.');
+    if (!file.type.startsWith("image/")) {
+      setError("Please select a valid image file.");
+      event.target.value = "";
       return;
     }
 
-    if (file.size > 2 * 1024 * 1024) {
-      alert('Image size must be less than 2 MB.');
+    if (file.size > MAX_FILE_SIZE) {
+      setError("Image must be smaller than 1.5 MB.");
+      event.target.value = "";
       return;
     }
-
-    setSelectedFile(file);
 
     const reader = new FileReader();
 
-    reader.onloadend = () => {
+    reader.onload = () => {
       setPreview(reader.result);
+    };
+
+    reader.onerror = () => {
+      setError("Unable to read this image.");
     };
 
     reader.readAsDataURL(file);
   };
 
-  const handleUpload = () => {
-    if (!selectedFile || !preview) {
-      alert('Please select an image first.');
+  const resetForm = () => {
+    setFormData({
+      title: "",
+      category: "Wedding",
+    });
+
+    setPreview("");
+    
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    if (!preview) {
+      setError("Please upload an image.");
       return;
     }
 
-    const newImage = {
-      id: Date.now(),
-      name: selectedFile.name,
-      image: preview,
-      date: new Date().toLocaleDateString()
-    };
+    if (!formData.title.trim()) {
+      setError("Please enter an image title.");
+      return;
+    }
 
-    const updatedImages = [...images, newImage];
+    setLoading(true);
+    setError("");
 
     try {
-      localStorage.setItem(
-        'gallery',
-        JSON.stringify(updatedImages)
+      addGalleryImage({
+        title: formData.title.trim(),
+        category: formData.category,
+        image: preview,
+      });
+
+      resetForm();
+    } catch (err) {
+      setError(
+        "Unable to save image. Browser storage may be full."
       );
-
-      setImages(updatedImages);
-      setSelectedFile(null);
-      setPreview('');
-
-      alert('Image uploaded successfully!');
-    } catch (error) {
-      alert('Storage limit reached. Try a smaller image.');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = (id) => {
-    const confirmDelete = window.confirm(
-      'Are you sure you want to delete this image?'
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this image?"
     );
 
-    if (!confirmDelete) return;
-
-    const updatedImages = images.filter(
-      (item) => item.id !== id
-    );
-
-    localStorage.setItem(
-      'gallery',
-      JSON.stringify(updatedImages)
-    );
-
-    setImages(updatedImages);
+    if (confirmed) {
+      deleteGalleryImage(id);
+    }
   };
 
   return (
-    <div className="admin-gallery">
-
-      <header className="gallery-header">
+    <div className="admin-page">
+      <div className="admin-header">
         <div>
           <h1>Manage Gallery</h1>
-          <p>Upload and manage your portfolio images.</p>
+          <p>Upload and manage portfolio photographs.</p>
         </div>
 
         <button
-          onClick={() => navigate('/admin/dashboard')}
+          className="btn btn-outline"
+          onClick={() => navigate("/admin/dashboard")}
         >
           Back to Dashboard
         </button>
-      </header>
+      </div>
 
-      <section className="gallery-upload">
+      {/* Upload Form */}
+      <section className="admin-card">
+        <h2>Upload New Photograph</h2>
 
-        <h2>Upload New Image</h2>
+        <form
+          className="admin-form"
+          onSubmit={handleSubmit}
+        >
+          <div className="form-group">
+            <label htmlFor="gallery-title">
+              Image Title *
+            </label>
 
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleFileChange}
-        />
-
-        {preview && (
-          <div className="image-preview">
-            <img
-              src={preview}
-              alt="Selected preview"
+            <input
+              id="gallery-title"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              placeholder="Enter image title"
+              required
             />
           </div>
-        )}
 
-        <button
-          onClick={handleUpload}
-          disabled={!selectedFile}
-        >
-          Upload Image
-        </button>
+          <div className="form-group">
+            <label htmlFor="gallery-category">
+              Category *
+            </label>
 
+            <select
+              id="gallery-category"
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+            >
+              <option value="Wedding">Wedding</option>
+              <option value="Portrait">Portrait</option>
+              <option value="Event">Event</option>
+              <option value="Fashion">Fashion</option>
+              <option value="Nature">Nature</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="gallery-image">
+              Select Photograph *
+            </label>
+
+            <input
+              ref={fileInputRef}
+              id="gallery-image"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleFileChange}
+            />
+          </div>
+
+          {preview && (
+            <div className="gallery-upload-preview">
+              <img
+                src={preview}
+                alt="Upload preview"
+              />
+            </div>
+          )}
+
+          {error && (
+            <p className="error-message">{error}</p>
+          )}
+
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={loading}
+          >
+            {loading ? "Saving..." : "Upload Image"}
+          </button>
+        </form>
       </section>
 
-      <section className="gallery-list">
+      {/* Gallery List */}
+      <section className="admin-card">
+        <h2>Gallery Images ({gallery.length})</h2>
 
-        <h2>Gallery Images ({images.length})</h2>
-
-        {images.length === 0 ? (
-          <p>No images uploaded yet.</p>
+        {gallery.length === 0 ? (
+          <p>No photographs uploaded yet.</p>
         ) : (
-          <div className="gallery-grid">
-
-            {images.map((item) => (
-              <div
-                className="gallery-item"
+          <div className="admin-gallery-grid">
+            {gallery.map((item) => (
+              <article
+                className="admin-gallery-item"
                 key={item.id}
               >
-
                 <img
                   src={item.image}
-                  alt={item.name}
+                  alt={item.title}
                 />
 
-                <p>{item.name}</p>
+                <div className="admin-gallery-info">
+                  <h3>{item.title}</h3>
 
-                <button
-                  className="delete-button"
-                  onClick={() => handleDelete(item.id)}
-                >
-                  Delete
-                </button>
+                  <span>{item.category}</span>
 
-              </div>
+                  <button
+                    type="button"
+                    className="btn btn-danger"
+                    onClick={() => handleDelete(item.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </article>
             ))}
-
           </div>
         )}
-
       </section>
-
     </div>
   );
-};
+}
 
 export default ManageGallery;

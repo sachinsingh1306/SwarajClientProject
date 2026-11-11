@@ -1,146 +1,100 @@
 
-import React from 'react';
+import { useApp } from "../context/AppContext";
 
-import Hero from '../components/home/Hero';
-import FeaturedGallery from '../components/home/FeaturedGallery';
-import Testimonials from '../components/home/Testimonials';
+import Hero from "../components/home/Hero";
+import FeaturedGallery from "../components/home/FeaturedGallery";
+import Testimonials from "../components/home/Testimonials";
 
-const Home = ({ navigate }) => {
-
-  const services = [
-    {
-      id: 1,
-      title: 'Wedding Photography',
-      icon: '💍',
-      description:
-        'Capture every beautiful moment of your special wedding day.'
-    },
-    {
-      id: 2,
-      title: 'Pre Wedding Photography',
-      icon: '❤️',
-      description:
-        'Create romantic memories with beautiful pre-wedding photoshoots.'
-    },
-    {
-      id: 3,
-      title: 'Portrait Photography',
-      icon: '📸',
-      description:
-        'Professional portraits that showcase your personality.'
-    },
-    {
-      id: 4,
-      title: 'Event Photography',
-      icon: '🎉',
-      description:
-        'Capture unforgettable memories from your special events.'
-    }
-  ];
+function Home({ navigate }) {
+  const { services, settings } = useApp();
 
   return (
     <div className="home-page">
-
-      {/* Hero Section */}
       <Hero navigate={navigate} />
 
-      {/* About Introduction */}
-      <section className="home-about">
+      {/* About Preview */}
+      <section className="home-about section-padding">
+        <div className="container">
+          <div className="section-heading">
+            <span className="section-subtitle">
+              ABOUT US
+            </span>
 
-        <div className="home-about-image">
+            <h2>Welcome to {settings.siteName}</h2>
 
-          <img
-            src="https://images.unsplash.com/photo-1452587925148-ce544e77e70d?w=1000"
-            alt="Professional photography"
-          />
+            <p>{settings.about}</p>
 
+            <button
+              className="btn btn-primary"
+              onClick={() => navigate("/about")}
+            >
+              Discover Our Story
+            </button>
+          </div>
         </div>
-
-        <div className="home-about-content">
-
-          <span>WELCOME TO PHOTOSTUDIO</span>
-
-          <h2>
-            We Capture Moments That Last Forever
-          </h2>
-
-          <p>
-            Photography is more than just taking pictures.
-            It is about capturing emotions, stories and
-            unforgettable memories.
-          </p>
-
-          <p>
-            Our team is passionate about delivering
-            beautiful photographs with creativity
-            and professional quality.
-          </p>
-
-          <button
-            onClick={() => navigate('/about')}
-          >
-            Discover Our Story
-          </button>
-
-        </div>
-
       </section>
 
-      {/* Services Section */}
-      <section className="home-services">
+      {/* Services */}
+      <section className="home-services section-padding">
+        <div className="container">
+          <div className="section-heading">
+            <span className="section-subtitle">
+              WHAT WE DO
+            </span>
 
-        <div className="section-heading">
+            <h2>Our Photography Services</h2>
 
-          <span>WHAT WE OFFER</span>
+            <p>
+              Professional photography for life's most
+              meaningful moments.
+            </p>
+          </div>
 
-          <h2>Our Photography Services</h2>
-
-          <p>
-            Professional photography services
-            for your special moments.
-          </p>
-
-        </div>
-
-        <div className="home-services-grid">
-
-          {services.map((service) => (
-
-            <div
-              className="home-service-card"
-              key={service.id}
-            >
-
-              <div className="service-icon">
-                {service.icon}
-              </div>
-
-              <h3>{service.title}</h3>
-
-              <p>{service.description}</p>
-
-              <button
-                onClick={() => navigate('/services')}
+          <div className="services-grid">
+            {services.slice(0, 3).map((service) => (
+              <article
+                className="service-card"
+                key={service.id}
               >
-                Learn More
-              </button>
+                <div className="service-image">
+                  <img
+                    src={service.image}
+                    alt={service.title}
+                    loading="lazy"
+                  />
+                </div>
 
-            </div>
+                <div className="service-content">
+                  <h3>{service.title}</h3>
 
-          ))}
+                  <p>{service.description}</p>
 
+                  <button
+                    className="btn btn-primary"
+                    onClick={() =>
+                      navigate(
+                        `/contact?service=${encodeURIComponent(
+                          service.title
+                        )}`
+                      )
+                    }
+                  >
+                    Enquire Now
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className="section-action">
+            <button
+              className="btn btn-outline"
+              onClick={() => navigate("/services")}
+            >
+              View All Services
+            </button>
+          </div>
         </div>
-
-        <div className="home-services-button">
-
-          <button
-            onClick={() => navigate('/services')}
-          >
-            View All Services
-          </button>
-
-        </div>
-
       </section>
 
       {/* Featured Gallery */}
@@ -149,34 +103,30 @@ const Home = ({ navigate }) => {
       {/* Testimonials */}
       <Testimonials />
 
-      {/* Final Call To Action */}
-      <section className="home-cta">
+      {/* Contact CTA */}
+      <section className="home-cta section-padding">
+        <div className="container">
+          <span className="section-subtitle">
+            LET'S WORK TOGETHER
+          </span>
 
-        <div className="home-cta-content">
-
-          <span>LET'S CREATE MEMORIES</span>
-
-          <h2>
-            Your Story Deserves To Be Captured
-          </h2>
+          <h2>Ready to Capture Your Story?</h2>
 
           <p>
-            Book your photography session today
-            and let us capture your beautiful moments.
+            Get in touch with {settings.ownerName || "our studio"}
+            {" "}and let's create something beautiful.
           </p>
 
           <button
-            onClick={() => navigate('/contact')}
+            className="btn btn-primary"
+            onClick={() => navigate("/contact")}
           >
             Book Your Session
           </button>
-
         </div>
-
       </section>
-
     </div>
   );
-};
+}
 
 export default Home;

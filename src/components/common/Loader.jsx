@@ -1,18 +1,8 @@
 
-import React from 'react';
-
-const Loader = ({
-  message = 'Loading...',
-  fullScreen = false
-}) => {
+const Loader = ({ message = "Loading..." }) => {
   return (
-    <div
-      className={`loader-container ${
-        fullScreen ? 'loader-fullscreen' : ''
-      }`}
-    >
-      <div className="loader-spinner"></div>
-
+    <div className="loader-container">
+      <div className="loader-spinner" role="status" aria-label="Loading" />
       <p>{message}</p>
     </div>
   );

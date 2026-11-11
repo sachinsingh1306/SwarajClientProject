@@ -1,30 +1,18 @@
 
-import React from 'react';
-
 const Button = ({
   children,
   onClick,
-  type = 'button',
-  variant = 'primary',
+  type = "button",
+  variant = "primary",
   disabled = false,
-  className = '',
-  fullWidth = false
+  className = "",
 }) => {
-  const buttonClasses = [
-    'custom-button',
-    `button-${variant}`,
-    fullWidth ? 'button-full-width' : '',
-    className
-  ]
-    .filter(Boolean)
-    .join(' ');
-
   return (
     <button
       type={type}
-      className={buttonClasses}
       onClick={onClick}
       disabled={disabled}
+      className={`btn btn-${variant} ${className}`}
     >
       {children}
     </button>

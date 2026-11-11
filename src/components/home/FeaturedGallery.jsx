@@ -1,123 +1,87 @@
 
-import React, { useEffect, useState } from 'react';
+import { useApp } from "../../context/AppContext";
 
-const defaultImages = [
-  {
-    id: 1,
-    title: 'Wedding Photography',
-    category: 'Wedding',
-    image:
-      'https://images.unsplash.com/photo-1519741497674-611481863552?w=800'
-  },
-  {
-    id: 2,
-    title: 'Pre Wedding Shoot',
-    category: 'Pre Wedding',
-    image:
-      'https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=800'
-  },
-  {
-    id: 3,
-    title: 'Portrait Photography',
-    category: 'Portrait',
-    image:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800'
-  },
-  {
-    id: 4,
-    title: 'Event Photography',
-    category: 'Event',
-    image:
-      'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800'
-  },
-  {
-    id: 5,
-    title: 'Couple Photography',
-    category: 'Couple',
-    image:
-      'https://images.unsplash.com/photo-1529636798458-92182e662485?w=800'
-  },
-  {
-    id: 6,
-    title: 'Fashion Photography',
-    category: 'Fashion',
-    image:
-      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800'
-  }
-];
+function FeaturedGallery({ navigate }) {
+  const { gallery } = useApp();
 
-const FeaturedGallery = ({ navigate }) => {
-  const [images, setImages] = useState(defaultImages);
-
-  useEffect(() => {
-    try {
-      const savedImages = JSON.parse(
-        localStorage.getItem('gallery') || '[]'
-      );
-
-      if (savedImages.length > 0) {
-        setImages(savedImages.slice(0, 6));
-      }
-    } catch (error) {
-      console.error('Unable to load gallery images:', error);
-    }
-  }, []);
+  const featuredImages = gallery.slice(0, 6);
 
   return (
-    <section className="featured-gallery">
+    <section className="featured-gallery section-padding">
+      <div className="container">
+        <div className="section-heading">
+          <span className="section-subtitle">
+            OUR RECENT WORK
+          </span>
 
-      <div className="section-heading">
-        <span>OUR PORTFOLIO</span>
+          <h2>Featured Photography</h2>
 
-        <h2>Featured Photography</h2>
+          <p>
+            A collection of moments captured by
+            Swaraj Gupta Photography.
+          </p>
+        </div>
 
-        <p>
-          Explore some of our beautiful moments
-          captured through our camera.
-        </p>
-      </div>
+        {featuredImages.length === 0 ? (
+          <div className="empty-state">
+            <h3>Gallery Coming Soon</h3>
 
-      <div className="featured-gallery-grid">
-
-        {images.map((item) => (
-          <div
-            className="featured-gallery-item"
-            key={item.id}
-          >
-
-            <img
-              src={item.image}
-              alt={item.title || item.name}
-              loading="lazy"
-            />
-
-            <div className="gallery-overlay">
-              <h3>
-                {item.title || item.name}
-              </h3>
-
-              <p>
-                {item.category || 'Photography'}
-              </p>
-            </div>
-
+            <p>
+              Our latest photography will appear here.
+            </p>
           </div>
-        ))}
+        ) : (
+          <div className="featured-gallery-grid">
+            {featuredImages.map((item) => (
+              <div
+                className="featured-gallery-item"
+                key={item.id}
+                onClick={() =>
+                  navigate(
+                    `/portfolio/detail?id=${encodeURIComponent(item.id)}`
+                  )
+                }
+                role="button"
+                tabIndex={0}
+                onKeyDown={(event) => {
+                  if (
+                    event.key === "Enter" ||
+                    event.key === " "
+                  ) {
+                    event.preventDefault();
 
+                    navigate(
+                      `/portfolio/detail?id=${encodeURIComponent(item.id)}`
+                    );
+                  }
+                }}
+              >
+                <img
+                  src={item.image}
+                  alt={item.title || "Photography"}
+                  loading="lazy"
+                />
+
+                <div className="gallery-item-overlay">
+                  <h3>{item.title}</h3>
+                  <span>{item.category}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="section-action">
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate("/portfolio")}
+          >
+            View Full Portfolio
+          </button>
+        </div>
       </div>
-
-      <div className="gallery-button-wrapper">
-
-        <button
-          onClick={() => navigate('/portfolio')}
-        >
-          View Full Portfolio
-        </button>
-
-      </div>
-
     </section>
   );
-};
+}
 
 export default FeaturedGallery;

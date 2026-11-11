@@ -1,122 +1,103 @@
 
-import React from 'react';
+import { useApp } from "../../context/AppContext";
 
-const Footer = ({ navigate }) => {
-  const handleNavigation = (e, path) => {
-    e.preventDefault();
-    navigate(path);
-  };
+function Footer({ navigate }) {
+  const { settings } = useApp();
+
+  const currentYear = new Date().getFullYear();
 
   return (
     <footer className="site-footer">
+      <div className="container">
+        <div className="footer-grid">
 
-      <div className="footer-container">
+          {/* Brand */}
+          <div className="footer-brand">
+            <h2>{settings.siteName}</h2>
 
-        {/* Company Information */}
-        <div className="footer-section">
-          <h2>PhotoStudio</h2>
+            <p>{settings.tagline}</p>
 
-          <p>
-            Capturing your beautiful moments and turning
-            them into memories that last forever.
-          </p>
-        </div>
+            <p>
+              Capturing beautiful moments and preserving
+              memories through photography.
+            </p>
+          </div>
 
-        {/* Quick Links */}
-        <div className="footer-section">
-          <h3>Quick Links</h3>
+          {/* Quick Links */}
+          <div className="footer-links">
+            <h3>Quick Links</h3>
 
-          <ul>
-            <li>
-              <a href="/" onClick={(e) => handleNavigation(e, '/')}>
-                Home
+            <button onClick={() => navigate("/")}>
+              Home
+            </button>
+
+            <button onClick={() => navigate("/about")}>
+              About
+            </button>
+
+            <button onClick={() => navigate("/services")}>
+              Services
+            </button>
+
+            <button onClick={() => navigate("/portfolio")}>
+              Portfolio
+            </button>
+
+            <button onClick={() => navigate("/contact")}>
+              Contact
+            </button>
+          </div>
+
+          {/* Contact */}
+          <div className="footer-contact">
+            <h3>Contact Information</h3>
+
+            <p>
+              <strong>Email:</strong>
+              <br />
+              <a href={`mailto:${settings.email}`}>
+                {settings.email}
               </a>
-            </li>
+            </p>
 
-            <li>
-              <a href="/about" onClick={(e) => handleNavigation(e, '/about')}>
-                About
+            <p>
+              <strong>Phone:</strong>
+              <br />
+              <a href={`tel:${settings.phone.replace(/\s/g, "")}`}>
+                {settings.phone}
               </a>
-            </li>
+            </p>
 
-            <li>
-              <a href="/services" onClick={(e) => handleNavigation(e, '/services')}>
-                Services
-              </a>
-            </li>
+            <p>
+              <strong>Address:</strong>
+              <br />
+              {settings.address}
+            </p>
 
-            <li>
-              <a href="/portfolio" onClick={(e) => handleNavigation(e, '/portfolio')}>
-                Portfolio
-              </a>
-            </li>
-
-            <li>
-              <a href="/contact" onClick={(e) => handleNavigation(e, '/contact')}>
-                Contact
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        {/* Contact Details */}
-        <div className="footer-section">
-          <h3>Contact Us</h3>
-
-          <p>📍 Jaipur, Rajasthan, India</p>
-
-          <p>
-            📧 info@example.com
-          </p>
-
-          <p>
-            📞 +91 9876543210
-          </p>
-        </div>
-
-        {/* Social Media */}
-        <div className="footer-section">
-          <h3>Follow Us</h3>
-
-          <div className="social-links">
             <a
-              href="https://www.instagram.com/"
+              href={settings.mapLink}
               target="_blank"
               rel="noopener noreferrer"
             >
-              Instagram
-            </a>
-
-            <a
-              href="https://www.facebook.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Facebook
-            </a>
-
-            <a
-              href="https://www.youtube.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              YouTube
+              Get Directions
             </a>
           </div>
+
         </div>
 
-      </div>
+        <div className="footer-bottom">
+          <p>
+            © {currentYear} {settings.siteName}.
+            All Rights Reserved.
+          </p>
 
-      {/* Copyright */}
-      <div className="footer-bottom">
-        <p>
-          © {new Date().getFullYear()} PhotoStudio.
-          All Rights Reserved.
-        </p>
+          <p>
+            Designed with ❤️ for beautiful memories.
+          </p>
+        </div>
       </div>
-
     </footer>
   );
-};
+}
 
 export default Footer;

@@ -1,42 +1,26 @@
 
-import React from 'react';
-
-const NotFound = ({ navigate }) => {
+function NotFound({ navigate }) {
   return (
-    <div className="not-found-page">
-
+    <section className="not-found-page">
       <div className="not-found-content">
-
         <h1>404</h1>
 
-        <h2>Oops! Page Not Found</h2>
+        <h2>Page Not Found</h2>
 
         <p>
-          The page you are looking for might have been
-          removed, renamed or is temporarily unavailable.
+          Sorry, the page you're looking for doesn't exist
+          or may have been moved.
         </p>
 
-        <div className="not-found-actions">
-
-          <button
-            onClick={() => navigate('/')}
-          >
-            Go to Homepage
-          </button>
-
-          <button
-            className="secondary-button"
-            onClick={() => navigate('/contact')}
-          >
-            Contact Us
-          </button>
-
-        </div>
-
+        <button
+          className="btn btn-primary"
+          onClick={() => navigate("/")}
+        >
+          Return to Home
+        </button>
       </div>
-
-    </div>
+    </section>
   );
-};
+}
 
 export default NotFound;

@@ -1,254 +1,265 @@
 
-import React, { useEffect, useState } from 'react';
+import { useState } from "react";
+import { useApp } from "../context/AppContext";
 
-const ManageServices = ({ navigate }) => {
-  const [services, setServices] = useState([]);
-  const [serviceName, setServiceName] = useState('');
-  const [description, setDescription] = useState('');
-  const [price, setPrice] = useState('');
-  const [editingId, setEditingId] = useState(null);
+function ManageServices({ navigate }) {
+  const {
+    services,
+    addService,
+    updateService,
+    deleteService,
+  } = useApp();
 
-  useEffect(() => {
-    if (!localStorage.getItem('adminLoggedIn')) {
-      navigate('/admin/login');
-      return;
-    }
-
-    loadServices();
-  }, []);
-
-  const loadServices = () => {
-    const savedServices = JSON.parse(
-      localStorage.getItem('services') || '[]'
-    );
-
-    setServices(savedServices);
+  const initialForm = {
+    title: "",
+    description: "",
+    image: "",
+    price: "",
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const [formData, setFormData] = useState(initialForm);
+  const [editingId, setEditingId] = useState(null);
+  const [error, setError] = useState("");
 
-    if (!serviceName.trim() || !description.trim()) {
-      alert('Please fill in all required fields.');
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setFormData((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+
+    if (
+      !formData.title.trim() ||
+      !formData.description.trim()
+    ) {
+      setError("Please enter the service title and description.");
       return;
     }
 
-    let updatedServices;
-
-    if (editingId !== null) {
-      updatedServices = services.map((service) =>
-        service.id === editingId
-          ? {
-              ...service,
-              name: serviceName,
-              description,
-              price
-            }
-          : service
-      );
-    } else {
-      const newService = {
-        id: Date.now(),
-        name: serviceName,
-        description,
-        price
-      };
-
-      updatedServices = [...services, newService];
+    if (
+      formData.image &&
+      !/^https?:\/\/|^data:image\//i.test(formData.image)
+    ) {
+      setError("Please enter a valid image URL.");
+      return;
     }
 
-    localStorage.setItem(
-      'services',
-      JSON.stringify(updatedServices)
-    );
+    if (editingId) {
+      updateService(editingId, formData);
+    } else {
+      addService(formData);
+    }
 
-    setServices(updatedServices);
-    resetForm();
-
-    alert(
-      editingId !== null
-        ? 'Service updated successfully!'
-        : 'Service added successfully!'
-    );
+    setFormData(initialForm);
+    setEditingId(null);
+    setError("");
   };
 
   const handleEdit = (service) => {
-    setServiceName(service.name);
-    setDescription(service.description);
-    setPrice(service.price || '');
+    setFormData({
+      title: service.title || "",
+      description: service.description || "",
+      image: service.image || "",
+      price: service.price || "",
+    });
+
     setEditingId(service.id);
 
-    window.scrollTo(0, 0);
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   const handleDelete = (id) => {
-    const confirmDelete = window.confirm(
-      'Are you sure you want to delete this service?'
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this service?"
     );
 
-    if (!confirmDelete) return;
+    if (confirmed) {
+      deleteService(id);
 
-    const updatedServices = services.filter(
-      (service) => service.id !== id
-    );
-
-    localStorage.setItem(
-      'services',
-      JSON.stringify(updatedServices)
-    );
-
-    setServices(updatedServices);
-
-    if (editingId === id) {
-      resetForm();
+      if (editingId === id) {
+        setFormData(initialForm);
+        setEditingId(null);
+      }
     }
   };
 
-  const resetForm = () => {
-    setServiceName('');
-    setDescription('');
-    setPrice('');
+  const handleCancel = () => {
+    setFormData(initialForm);
     setEditingId(null);
+    setError("");
   };
 
   return (
-    <div className="admin-services">
-
-      <header className="services-header">
+    <div className="admin-page">
+      <div className="admin-header">
         <div>
           <h1>Manage Services</h1>
-          <p>Add and manage photography services.</p>
+          <p>Add, update and manage photography services.</p>
         </div>
 
         <button
-          onClick={() => navigate('/admin/dashboard')}
+          className="btn btn-outline"
+          onClick={() => navigate("/admin/dashboard")}
         >
           Back to Dashboard
         </button>
-      </header>
+      </div>
 
-      <section className="service-form-section">
-
+      {/* Service Form */}
+      <section className="admin-card">
         <h2>
-          {editingId !== null
-            ? 'Edit Service'
-            : 'Add New Service'}
+          {editingId ? "Edit Service" : "Add New Service"}
         </h2>
 
-        <form onSubmit={handleSubmit}>
-
+        <form onSubmit={handleSubmit} className="admin-form">
           <div className="form-group">
-            <label>Service Name</label>
+            <label htmlFor="title">Service Title *</label>
 
             <input
-              type="text"
-              placeholder="Enter service name"
-              value={serviceName}
-              onChange={(e) =>
-                setServiceName(e.target.value)
-              }
+              id="title"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              placeholder="e.g. Wedding Photography"
               required
             />
           </div>
 
           <div className="form-group">
-            <label>Description</label>
+            <label htmlFor="description">Description *</label>
 
             <textarea
-              placeholder="Enter service description"
-              value={description}
-              onChange={(e) =>
-                setDescription(e.target.value)
-              }
+              id="description"
+              name="description"
+              rows="4"
+              value={formData.description}
+              onChange={handleChange}
+              placeholder="Describe your service"
               required
             />
           </div>
 
           <div className="form-group">
-            <label>Price</label>
+            <label htmlFor="image">Image URL</label>
 
             <input
-              type="number"
-              placeholder="Enter price"
-              min="0"
-              value={price}
-              onChange={(e) =>
-                setPrice(e.target.value)
-              }
+              id="image"
+              name="image"
+              type="url"
+              value={formData.image}
+              onChange={handleChange}
+              placeholder="https://example.com/image.jpg"
             />
           </div>
 
-          <button type="submit">
-            {editingId !== null
-              ? 'Update Service'
-              : 'Add Service'}
-          </button>
-
-          {editingId !== null && (
-            <button
-              type="button"
-              onClick={resetForm}
-            >
-              Cancel Edit
-            </button>
+          {formData.image && (
+            <img
+              className="admin-image-preview"
+              src={formData.image}
+              alt="Service preview"
+              onError={(event) => {
+                event.currentTarget.style.display = "none";
+              }}
+            />
           )}
 
-        </form>
+          <div className="form-group">
+            <label htmlFor="price">Price</label>
 
+            <input
+              id="price"
+              name="price"
+              value={formData.price}
+              onChange={handleChange}
+              placeholder="Contact for pricing"
+            />
+          </div>
+
+          {error && (
+            <p className="error-message">{error}</p>
+          )}
+
+          <div className="admin-form-actions">
+            <button
+              className="btn btn-primary"
+              type="submit"
+            >
+              {editingId ? "Update Service" : "Add Service"}
+            </button>
+
+            {editingId && (
+              <button
+                className="btn btn-outline"
+                type="button"
+                onClick={handleCancel}
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </form>
       </section>
 
-      <section className="services-list">
-
-        <h2>All Services ({services.length})</h2>
+      {/* Service List */}
+      <section className="admin-card">
+        <h2>Existing Services ({services.length})</h2>
 
         {services.length === 0 ? (
           <p>No services added yet.</p>
         ) : (
-          <div className="services-grid">
-
+          <div className="admin-service-list">
             {services.map((service) => (
-              <div
-                className="service-card"
+              <article
+                className="admin-service-item"
                 key={service.id}
               >
-
-                <h3>{service.name}</h3>
-
-                <p>{service.description}</p>
-
-                {service.price && (
-                  <p>
-                    <strong>Price:</strong> ₹{service.price}
-                  </p>
+                {service.image && (
+                  <img
+                    src={service.image}
+                    alt={service.title}
+                  />
                 )}
 
-                <div className="service-actions">
+                <div className="admin-service-info">
+                  <h3>{service.title}</h3>
 
+                  <p>{service.description}</p>
+
+                  <span>{service.price}</span>
+                </div>
+
+                <div className="admin-item-actions">
                   <button
+                    type="button"
+                    className="btn btn-outline"
                     onClick={() => handleEdit(service)}
                   >
                     Edit
                   </button>
 
                   <button
-                    className="delete-button"
+                    type="button"
+                    className="btn btn-danger"
                     onClick={() => handleDelete(service.id)}
                   >
                     Delete
                   </button>
-
                 </div>
-
-              </div>
+              </article>
             ))}
-
           </div>
         )}
-
       </section>
-
     </div>
   );
-};
+}
 
 export default ManageServices;

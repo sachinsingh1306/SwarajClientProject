@@ -1,154 +1,179 @@
 
-import React from 'react';
+import { useEffect } from "react";
+import { useApp } from "../context/AppContext";
 
-const Dashboard = ({ navigate }) => {
-  // Check admin login
-  const isLoggedIn = localStorage.getItem('adminLoggedIn');
+function Dashboard({ navigate }) {
+  const {
+    services,
+    gallery,
+    leads,
+    testimonials,
+    settings,
+  } = useApp();
 
-  if (!isLoggedIn) {
-    navigate('/admin/login');
+  useEffect(() => {
+    const isLoggedIn =
+      localStorage.getItem("adminLoggedIn") === "true";
+
+    if (!isLoggedIn) {
+      navigate("/admin/login");
+    }
+  }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("adminLoggedIn");
+    navigate("/admin/login");
+  };
+
+  const stats = [
+    {
+      title: "Total Services",
+      count: services.length,
+      icon: "📸",
+      path: "/admin/services",
+    },
+    {
+      title: "Gallery Images",
+      count: gallery.length,
+      icon: "🖼️",
+      path: "/admin/gallery",
+    },
+    {
+      title: "Total Enquiries",
+      count: leads.length,
+      icon: "📩",
+      path: "/admin/leads",
+    },
+    {
+      title: "Testimonials",
+      count: testimonials.length,
+      icon: "⭐",
+      path: "/admin/testimonials",
+    },
+  ];
+
+  const recentLeads = leads.slice(0, 5);
+
+  if (localStorage.getItem("adminLoggedIn") !== "true") {
     return null;
   }
 
-  // Dashboard statistics
-  const stats = [
-    {
-      title: 'Total Leads',
-      value: '120',
-      icon: '📩',
-      color: '#3498db'
-    },
-    {
-      title: 'Total Services',
-      value: '8',
-      icon: '🛠️',
-      color: '#2ecc71'
-    },
-    {
-      title: 'Gallery Images',
-      value: '45',
-      icon: '🖼️',
-      color: '#9b59b6'
-    },
-    {
-      title: 'Pending Enquiries',
-      value: '15',
-      icon: '⏳',
-      color: '#e67e22'
-    }
-  ];
-
-  const handleLogout = () => {
-    localStorage.removeItem('adminLoggedIn');
-    navigate('/admin/login');
-  };
-
   return (
     <div className="admin-dashboard">
-
-      <aside className="admin-sidebar">
-
-        <h2>Admin Panel</h2>
-
-        <nav>
-          <button onClick={() => navigate('/admin/dashboard')}>
-            Dashboard
-          </button>
-
-          <button onClick={() => navigate('/admin/leads')}>
-            Manage Leads
-          </button>
-
-          <button onClick={() => navigate('/admin/gallery')}>
-            Manage Gallery
-          </button>
-
-          <button onClick={() => navigate('/admin/services')}>
-            Manage Services
-          </button>
-        </nav>
+      <header className="admin-header">
+        <div>
+          <h1>Admin Dashboard</h1>
+          <p>Welcome to {settings.siteName}</p>
+        </div>
 
         <button
-          className="logout-button"
+          className="btn btn-danger"
           onClick={handleLogout}
         >
           Logout
         </button>
+      </header>
 
-      </aside>
+      {/* Statistics */}
+      <section className="admin-stats-grid">
+        {stats.map((stat) => (
+          <button
+            type="button"
+            className="admin-stat-card"
+            key={stat.title}
+            onClick={() => navigate(stat.path)}
+          >
+            <span className="admin-stat-icon">
+              {stat.icon}
+            </span>
 
-      <main className="dashboard-content">
-
-        <header className="dashboard-header">
-          <div>
-            <h1>Dashboard</h1>
-            <p>Welcome to your admin dashboard.</p>
-          </div>
-
-          <button onClick={handleLogout}>
-            Logout
-          </button>
-        </header>
-
-        <section className="dashboard-stats">
-
-          {stats.map((stat, index) => (
-            <div
-              className="stat-card"
-              key={index}
-              style={{ borderLeft: `5px solid ${stat.color}` }}
-            >
-              <div className="stat-icon">
-                {stat.icon}
-              </div>
-
-              <div>
-                <h3>{stat.value}</h3>
-                <p>{stat.title}</p>
-              </div>
+            <div>
+              <h3>{stat.count}</h3>
+              <p>{stat.title}</p>
             </div>
-          ))}
+          </button>
+        ))}
+      </section>
 
-        </section>
+      {/* Management Navigation */}
+      <section className="admin-card">
+        <h2>Manage Website</h2>
 
-        <section className="dashboard-actions">
+        <div className="admin-quick-links">
+          <button
+            onClick={() => navigate("/admin/services")}
+          >
+            Manage Services
+          </button>
 
-          <h2>Quick Actions</h2>
+          <button
+            onClick={() => navigate("/admin/gallery")}
+          >
+            Manage Gallery
+          </button>
 
-          <div className="action-grid">
+          <button
+            onClick={() => navigate("/admin/leads")}
+          >
+            View Enquiries
+          </button>
 
-            <button
-              onClick={() => navigate('/admin/leads')}
-            >
-              📩 View Leads
-            </button>
+          <button
+            onClick={() => navigate("/admin/settings")}
+          >
+            Website Settings
+          </button>
+        </div>
+      </section>
 
-            <button
-              onClick={() => navigate('/admin/gallery')}
-            >
-              🖼️ Manage Gallery
-            </button>
+      {/* Recent Leads */}
+      <section className="admin-card">
+        <div className="admin-section-heading">
+          <h2>Recent Enquiries</h2>
 
-            <button
-              onClick={() => navigate('/admin/services')}
-            >
-              🛠️ Manage Services
-            </button>
+          <button
+            className="btn btn-outline"
+            onClick={() => navigate("/admin/leads")}
+          >
+            View All
+          </button>
+        </div>
 
-            <button
-              onClick={() => navigate('/')}
-            >
-              🌐 Visit Website
-            </button>
+        {recentLeads.length === 0 ? (
+          <p>No enquiries received yet.</p>
+        ) : (
+          <div className="admin-table-wrapper">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Service</th>
+                  <th>Phone</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
 
+              <tbody>
+                {recentLeads.map((lead) => (
+                  <tr
+                    key={lead.id}
+                    onClick={() =>
+                      navigate(`/admin/leads/${lead.id}`)
+                    }
+                  >
+                    <td>{lead.name}</td>
+                    <td>{lead.service}</td>
+                    <td>{lead.phone}</td>
+                    <td>{lead.status || "New"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-
-        </section>
-
-      </main>
-
+        )}
+      </section>
     </div>
   );
-};
+}
 
 export default Dashboard;
