@@ -42,6 +42,7 @@ const defaultServices = [
 ];
 
 const defaultSettings = {
+  siteName: "Swaraj Gupta Photography",
   portfolioName: "Swaraj Gupta Photography",
   ownerName: "Swaraj Gupta",
   tagline: "Turning your beautiful moments into timeless memories.",
@@ -80,6 +81,14 @@ export const AppProvider = ({ children }) => {
     "portfolio_settings",
     defaultSettings
   );
+
+  // Support settings saved by both the older `portfolioName` and newer
+  // `siteName` form fields while keeping one consistent public value.
+  const normalizedSettings = {
+    ...settings,
+    siteName: settings.siteName || settings.portfolioName || defaultSettings.siteName,
+    portfolioName: settings.portfolioName || settings.siteName || defaultSettings.portfolioName,
+  };
 
   // SERVICES
   const addService = (service) => {
@@ -127,15 +136,17 @@ export const AppProvider = ({ children }) => {
     ]);
   };
 
-  const updateLeadStatus = (id, status) => {
+  const updateLead = (id, updates) => {
     setLeads((prev) =>
       prev.map((lead) =>
         lead.id === id
-          ? { ...lead, status }
+          ? { ...lead, ...(typeof updates === "string" ? { status: updates } : updates) }
           : lead
       )
     );
   };
+
+  const updateLeadStatus = (id, status) => updateLead(id, status);
 
   const deleteLead = (id) => {
     setLeads((prev) =>
@@ -172,6 +183,11 @@ export const AppProvider = ({ children }) => {
     setSettings((prev) => ({
       ...prev,
       ...updatedSettings,
+      ...(Object.hasOwn(updatedSettings, "siteName")
+        ? { portfolioName: updatedSettings.siteName }
+        : Object.hasOwn(updatedSettings, "portfolioName")
+          ? { siteName: updatedSettings.portfolioName }
+          : {}),
     }));
   };
 
@@ -181,7 +197,7 @@ export const AppProvider = ({ children }) => {
       gallery,
       leads,
       testimonials,
-      settings,
+      settings: normalizedSettings,
 
       addService,
       updateService,
@@ -191,6 +207,7 @@ export const AppProvider = ({ children }) => {
       deleteGalleryImage,
 
       addLead,
+      updateLead,
       updateLeadStatus,
       deleteLead,
 
@@ -200,7 +217,7 @@ export const AppProvider = ({ children }) => {
 
       updateSettings,
     }),
-    [services, gallery, leads, testimonials, settings]
+    [services, gallery, leads, testimonials, normalizedSettings]
   );
 
   return (

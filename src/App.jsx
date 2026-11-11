@@ -88,6 +88,16 @@ function App() {
     page = <NotFound navigate={navigate} />;
   }
 
+  // Keep unauthenticated visitors out of admin screens. This is a UI guard
+  // only; production administration still requires server-side authentication.
+  if (
+    isAdmin &&
+    pathname !== "/admin/login" &&
+    window.localStorage.getItem("adminLoggedIn") !== "true"
+  ) {
+    page = <AdminLogin navigate={navigate} />;
+  }
+
   return (
     <>
       {!isAdmin && <Navbar navigate={navigate} />}

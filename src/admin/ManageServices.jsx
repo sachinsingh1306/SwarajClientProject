@@ -2,6 +2,49 @@
 import { useState } from "react";
 import { useApp } from "../context/AppContext";
 
+const photographyServicePresets = [
+  {
+    title: "Instagram Reels & Short-Form Video",
+    category: "Social Media",
+    description: "Creative vertical reels and short-form videos for Instagram and other social platforms, planned and filmed to showcase your brand, event, or story.",
+  },
+  {
+    title: "Brand Photography",
+    category: "Commercial",
+    description: "A polished collection of portraits, workspace, products, and behind-the-scenes images that give your business a consistent visual identity.",
+  },
+  {
+    title: "Product Photography",
+    category: "Commercial",
+    description: "Clean, detailed product images for websites, online stores, catalogs, and social media campaigns.",
+  },
+  {
+    title: "Corporate Headshots",
+    category: "Portrait",
+    description: "Professional individual and team portraits for company websites, profiles, press kits, and professional networks.",
+  },
+  {
+    title: "Pre-Wedding Photography",
+    category: "Wedding",
+    description: "Relaxed couple portraits that tell your story in a location and style that feel personal to you.",
+  },
+  {
+    title: "Maternity & Newborn Photography",
+    category: "Portrait",
+    description: "Gentle, thoughtful portraits celebrating pregnancy and your family's first days together.",
+  },
+  {
+    title: "Event Photography",
+    category: "Event",
+    description: "Natural coverage of conferences, celebrations, launches, and private events, with the key moments and atmosphere captured.",
+  },
+  {
+    title: "Food & Restaurant Photography",
+    category: "Commercial",
+    description: "Appetizing menu, restaurant, and hospitality images for websites, delivery listings, menus, and campaigns.",
+  },
+];
+
 function ManageServices({ navigate }) {
   const {
     services,
@@ -20,6 +63,20 @@ function ManageServices({ navigate }) {
   const [formData, setFormData] = useState(initialForm);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState("");
+  const [presetMessage, setPresetMessage] = useState("");
+
+  const availablePresets = photographyServicePresets.filter(
+    (preset) =>
+      !services.some(
+        (service) =>
+          String(service.title || "").trim().toLowerCase() === preset.title.toLowerCase()
+      )
+  );
+
+  const handleAddPreset = (preset) => {
+    addService({ ...preset, image: "", price: "" });
+    setPresetMessage(`${preset.title} added to your services.`);
+  };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -206,6 +263,30 @@ function ManageServices({ navigate }) {
             )}
           </div>
         </form>
+      </section>
+
+      {/* Ready-to-add professional photography services */}
+      <section className="admin-card">
+        <h2>Popular Photography Services</h2>
+        <p>Quick-add a service, then edit its details, image, or pricing above.</p>
+        {presetMessage && <p className="success-message" role="status">{presetMessage}</p>}
+
+        {availablePresets.length === 0 ? (
+          <p>All suggested services are already in your list.</p>
+        ) : (
+          <div className="admin-quick-links">
+            {availablePresets.map((preset) => (
+              <button
+                type="button"
+                key={preset.title}
+                onClick={() => handleAddPreset(preset)}
+                aria-label={`Add ${preset.title}`}
+              >
+                + {preset.title}
+              </button>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Service List */}

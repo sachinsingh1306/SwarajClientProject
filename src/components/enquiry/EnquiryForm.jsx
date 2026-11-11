@@ -65,6 +65,8 @@ function EnquiryForm({ navigate }) {
 const handleSubmit = (e) => {
   e.preventDefault();
 
+  if (!validateForm()) return;
+
   // Save the enquiry in localStorage through AppContext
   const newLead = {
     id: crypto.randomUUID(),
