@@ -10,34 +10,32 @@ function ThankYou({ navigate }) {
         <div className="thank-you-icon">✓</div>
 
         <span className="section-subtitle">
-          ENQUIRY RECEIVED
+          FRONTEND-ONLY CONTACT
         </span>
 
-        <h1>Thank You!</h1>
+        <h1>One last step</h1>
 
         <p>
-          Your enquiry has been saved successfully.
-          Thank you for contacting {settings.siteName}.
+          This website does not send or save enquiries automatically. To contact {settings.siteName}, prepare your message on the Contact page and send it using WhatsApp or email.
         </p>
 
         <p>
-          We appreciate your interest and look forward
-          to discussing your photography requirements.
+          Your enquiry is only delivered after you press Send in your chosen app.
         </p>
 
         <div className="thank-you-actions">
           <button
             className="btn btn-primary"
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/contact")}
           >
-            Back to Home
+            Go to Contact
           </button>
 
           <button
             className="btn btn-outline"
-            onClick={() => navigate("/portfolio")}
+            onClick={() => navigate("/")}
           >
-            Explore Portfolio
+            Back to Home
           </button>
         </div>
       </div>

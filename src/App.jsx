@@ -14,6 +14,7 @@ import NotFound from "./pages/NotFound";
 // Common components
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
+import ChatAssistant from "./components/common/ChatAssistant";
 
 // Admin pages
 import AdminLogin from "./admin/AdminLogin";
@@ -100,11 +101,12 @@ function App() {
 
   return (
     <>
-      {!isAdmin && <Navbar navigate={navigate} />}
+      {!isAdmin && <Navbar navigate={navigate} pathname={pathname} />}
 
       <main>{page}</main>
 
       {!isAdmin && <Footer navigate={navigate} />}
+      {!isAdmin && <ChatAssistant />}
     </>
   );
 }

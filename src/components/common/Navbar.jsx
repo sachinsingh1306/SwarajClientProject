@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useApp } from "../../context/AppContext";
 
-const Navbar = ({ navigate }) => {
+const Navbar = ({ navigate, pathname = window.location.pathname }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const { settings } = useApp();
 
@@ -44,7 +44,18 @@ const Navbar = ({ navigate }) => {
           {links.map((link) => (
             <button
               key={link.path}
-              className="nav-link"
+              className={`nav-link ${
+                pathname === link.path ||
+                (link.path === "/portfolio" && pathname.startsWith("/portfolio/"))
+                  ? "active"
+                  : ""
+              }`}
+              aria-current={
+                pathname === link.path ||
+                (link.path === "/portfolio" && pathname.startsWith("/portfolio/"))
+                  ? "page"
+                  : undefined
+              }
               onClick={() => handleNavigation(link.path)}
             >
               {link.label}

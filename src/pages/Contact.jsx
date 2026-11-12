@@ -2,7 +2,7 @@
 import { useApp } from "../context/AppContext";
 import EnquiryForm from "../components/enquiry/EnquiryForm";
 
-function Contact({ navigate }) {
+function Contact() {
   const { settings } = useApp();
 
   const phoneLink = `tel:${settings.phone.replace(/\s/g, "")}`;
@@ -85,7 +85,7 @@ function Contact({ navigate }) {
 
             {/* Enquiry Form */}
             <div className="contact-form">
-              <EnquiryForm navigate={navigate} />
+              <EnquiryForm />
             </div>
 
           </div>
