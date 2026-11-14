@@ -1,4 +1,4 @@
-// Eight two- or three-word matches per topic produce more than 200 FAQ entries.
+// Two- or three-word triggers map questions to the studio's photography answers.
 // Answers avoid quoting prices or policies that have not been configured by the studio.
 const faqTopics = [
   { answer: "Pricing depends on the service, session length, location, and deliverables. Share your shoot details on WhatsApp for a tailored quote.", phrases: ["photography price", "photo shoot price", "wedding photography price", "portrait session price", "event photography price", "brand shoot price", "photoshoot package price", "how much photography"] },
@@ -42,6 +42,92 @@ const faqTopics = [
   { answer: "Please describe the issue and include your shoot date or gallery details. The studio can review your request and advise on the next step.", phrases: ["contact photographer support", "change my photo order", "fix photo request", "booking help request", "follow up enquiry", "ask about my booking", "photo service question", "need photographer help"] },
 ];
 
-export const photographyFaqs = faqTopics.flatMap(({ answer, phrases }) =>
+const additionalServiceTypes = [
+  { label: "wedding photography", phrase: "wedding" },
+  { label: "pre-wedding photography", phrase: "pre wedding" },
+  { label: "engagement photography", phrase: "engagement" },
+  { label: "portrait photography", phrase: "portrait" },
+  { label: "family photography", phrase: "family" },
+  { label: "maternity photography", phrase: "maternity" },
+  { label: "newborn photography", phrase: "newborn" },
+  { label: "event photography", phrase: "event" },
+  { label: "birthday photography", phrase: "birthday" },
+  { label: "corporate photography", phrase: "corporate" },
+  { label: "headshot photography", phrase: "headshot" },
+  { label: "brand photography", phrase: "brand" },
+  { label: "product photography", phrase: "product" },
+  { label: "food photography", phrase: "food" },
+  { label: "restaurant photography", phrase: "restaurant" },
+  { label: "Instagram Reels", phrase: "instagram reels" },
+  { label: "social media photography", phrase: "social media" },
+  { label: "video production", phrase: "video" },
+  { label: "real estate photography", phrase: "real estate" },
+  { label: "architecture photography", phrase: "architecture" },
+  { label: "fashion photography", phrase: "fashion" },
+  { label: "graduation photography", phrase: "graduation" },
+  { label: "sports photography", phrase: "sports" },
+  { label: "travel photography", phrase: "travel" },
+  { label: "pet photography", phrase: "pet" },
+  { label: "kids photography", phrase: "kids" },
+  { label: "school photography", phrase: "school" },
+  { label: "commercial photography", phrase: "commercial" },
+  { label: "luxury photography", phrase: "luxury" },
+  { label: "couple photography", phrase: "couple" },
+];
+
+const serviceFaqDimensions = [
+  {
+    phrase: "price",
+    answer: (service) => `Pricing for ${service} depends on the session length, location, and final deliverables. Share your requirements for an accurate quote.`,
+  },
+  {
+    phrase: "booking",
+    answer: (service) => `To book ${service}, share your preferred date, city, and requirements. The photographer can confirm availability and next steps.`,
+  },
+  {
+    phrase: "location",
+    answer: (service) => `The location for ${service} depends on your creative goals. Suggest a venue or city and the studio can discuss practical options.`,
+  },
+  {
+    phrase: "coverage",
+    answer: (service) => `Coverage time for ${service} depends on your schedule and planned shots. Share a timeline to discuss a suitable coverage plan.`,
+  },
+  {
+    phrase: "preparation",
+    answer: (service) => `To prepare for ${service}, share references, preferences, and important moments. You can discuss a shot list with the photographer before the session.`,
+  },
+  {
+    phrase: "style",
+    answer: (service) => `The style for ${service} can be guided by reference images, colors, and mood. Share examples to discuss a consistent approach.`,
+  },
+  {
+    phrase: "delivery",
+    answer: (service) => `The delivery timeline for ${service} depends on the shoot size and editing needs. Confirm the expected schedule with the studio when booking.`,
+  },
+  {
+    phrase: "availability",
+    answer: (service) => `Availability for ${service} depends on your preferred date, city, and schedule. Share your timing and the studio can confirm the most suitable option.`,
+  },
+  {
+    phrase: "customization",
+    answer: (service) => `Customization for ${service} can be discussed around your mood, location, and final use. Share the details you want included to shape the session plan.`,
+  },
+  {
+    phrase: "editing",
+    answer: (service) => `Editing for ${service} is tailored to your preferred finish, retouching needs, and final gallery style. Share your reference examples to guide the edit.`,
+  },
+];
+
+// 30 service types x 10 common questions = 300 additional response topics.
+const additionalFaqTopics = additionalServiceTypes.flatMap((service) =>
+  serviceFaqDimensions.map((dimension) => ({
+    answer: dimension.answer(service.label),
+    phrases: [`${service.phrase} ${dimension.phrase}`],
+  }))
+);
+
+const allFaqTopics = [...faqTopics, ...additionalFaqTopics];
+
+export const photographyFaqs = allFaqTopics.flatMap(({ answer, phrases }) =>
   phrases.map((phrase) => ({ phrase, answer }))
 );
