@@ -1,5 +1,6 @@
 
 import { useApp } from "../context/AppContext";
+import MobilePageContent from "../components/common/MobilePageContent";
 
 function Services({ navigate }) {
   const { services, settings } = useApp();
@@ -99,6 +100,26 @@ function Services({ navigate }) {
           )}
         </div>
       </section>
+
+      <MobilePageContent
+        eyebrow="FIND YOUR FIT"
+        title="A good place to begin"
+        intro="If you are deciding which photography service to enquire about, start with the occasion and how you hope to use the finished images."
+        points={[
+          {
+            title: "Name the occasion",
+            description: "Share whether you are planning an event, portraits, brand imagery, or another kind of session.",
+          },
+          {
+            title: "Describe the images you need",
+            description: "Let us know who or what you would like photographed and where the photographs will be used.",
+          },
+          {
+            title: "Include the practical details",
+            description: "A preferred date, location, and approximate schedule help the studio understand your enquiry.",
+          },
+        ]}
+      />
 
       {/* Call to Action */}
       <section className="services-cta">

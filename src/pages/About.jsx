@@ -1,5 +1,6 @@
 
 import { useApp } from "../context/AppContext";
+import MobilePageContent from "../components/common/MobilePageContent";
 
 function About({ navigate }) {
   const { settings } = useApp();
@@ -99,6 +100,26 @@ function About({ navigate }) {
           <p className="session-followup-note">Specific packages, availability, delivery timelines, and pricing are confirmed directly with the studio so you know what is included before booking.</p>
         </div>
       </section>
+
+      <MobilePageContent
+        eyebrow="BEFORE THE SESSION"
+        title="Come as you are"
+        intro="You do not need a perfect plan or experience in front of the camera. A little conversation is enough to get started."
+        points={[
+          {
+            title: "Tell us what feels important",
+            description: "Let the studio know about meaningful people, moments, or details you would like to make space for.",
+          },
+          {
+            title: "Choose comfort over perfection",
+            description: "Wear something that feels like you and allows you to enjoy the occasion or session.",
+          },
+          {
+            title: "Take your time",
+            description: "Share any questions or preferences in advance so the session can be discussed around your needs.",
+          },
+        ]}
+      />
 
       {/* Helpful answers */}
       <section className="about-faq section-padding">

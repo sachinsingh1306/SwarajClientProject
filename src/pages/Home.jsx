@@ -4,6 +4,7 @@ import { useApp } from "../context/AppContext";
 import Hero from "../components/home/Hero";
 import FeaturedGallery from "../components/home/FeaturedGallery";
 import Testimonials from "../components/home/Testimonials";
+import MobilePageContent from "../components/common/MobilePageContent";
 
 function Home({ navigate }) {
   const { services, settings } = useApp();
@@ -96,6 +97,26 @@ function Home({ navigate }) {
           </div>
         </div>
       </section>
+
+      <MobilePageContent
+        eyebrow="A LITTLE INSPIRATION"
+        title="Make room for the moments that matter"
+        intro="A thoughtful session starts with the feeling you want to remember. The details can come together one step at a time."
+        points={[
+          {
+            title: "Start with your story",
+            description: "Think about the people, places, and small details you would love to see reflected in your photographs.",
+          },
+          {
+            title: "Bring a few references",
+            description: "A favorite photograph, color palette, or simple mood description can help communicate the look you have in mind.",
+          },
+          {
+            title: "Ask anything",
+            description: "Share your questions about timing, location, or planning when you enquire. We can begin with the details you already know.",
+          },
+        ]}
+      />
 
       {/* Featured Gallery */}
       <FeaturedGallery navigate={navigate} />

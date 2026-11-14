@@ -21,10 +21,10 @@ const Navbar = ({ navigate, pathname = window.location.pathname }) => {
   };
 
   return (
-    <header className="navbar">
-      <div className="navbar-container">
+    <header className="luxury-navbar">
+      <div className="luxury-navbar-inner">
         <button
-          className="navbar-brand"
+          className="luxury-brand"
           onClick={() => handleNavigation("/")}
           aria-label="Go to homepage"
         >
@@ -40,11 +40,11 @@ const Navbar = ({ navigate, pathname = window.location.pathname }) => {
           {menuOpen ? "✕" : "☰"}
         </button>
 
-        <nav className={`navbar-links ${menuOpen ? "active" : ""}`}>
+        <nav className={`luxury-nav ${menuOpen ? "active" : ""}`}>
           {links.map((link) => (
             <button
               key={link.path}
-              className={`nav-link ${
+              className={`luxury-nav-link ${
                 pathname === link.path ||
                 (link.path === "/portfolio" && pathname.startsWith("/portfolio/"))
                   ? "active"
@@ -61,14 +61,22 @@ const Navbar = ({ navigate, pathname = window.location.pathname }) => {
               {link.label}
             </button>
           ))}
-
           <button
-            className="nav-contact-btn"
+            className="luxury-menu-booking"
             onClick={() => handleNavigation("/contact")}
           >
-            Book a Session
+            BOOK A SESSION
           </button>
         </nav>
+
+        <div className="luxury-nav-cta-block">
+          <button
+            className="luxury-nav-cta"
+            onClick={() => handleNavigation("/contact")}
+          >
+            BOOK A SESSION
+          </button>
+        </div>
       </div>
     </header>
   );

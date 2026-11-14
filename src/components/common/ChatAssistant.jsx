@@ -41,9 +41,10 @@ const tokenize = (text) =>
     .replace(/[\u0300-\u036f]/g, "")
     .match(/[a-z0-9]+/g) || [];
 
-function ChatAssistant() {
+function ChatAssistant({ navigate }) {
   const { services, settings } = useApp();
   const [isOpen, setIsOpen] = useState(false);
+  const [quickActionsOpen, setQuickActionsOpen] = useState(false);
   const [activeOption, setActiveOption] = useState(null);
   const [answer, setAnswer] = useState("");
   const [customService, setCustomService] = useState("");
@@ -59,6 +60,26 @@ function ChatAssistant() {
   const whatsappUrl = whatsappNumber
     ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`
     : "";
+
+  const handleLauncherClick = () => {
+    if (window.matchMedia("(max-width: 980px)").matches) {
+      setQuickActionsOpen((open) => !open);
+      setIsOpen(false);
+      return;
+    }
+
+    setIsOpen((open) => !open);
+  };
+
+  const openPhotoAssistant = () => {
+    setQuickActionsOpen(false);
+    setIsOpen(true);
+  };
+
+  const openBooking = () => {
+    setQuickActionsOpen(false);
+    navigate("/contact");
+  };
 
   const chooseOption = (option) => {
     setActiveOption(option);
@@ -111,6 +132,25 @@ function ChatAssistant() {
 
   return (
     <div className="chat-assistant">
+      {quickActionsOpen && (
+        <div className="chat-assistant-quick-actions" role="group" aria-label="Choose an action">
+          <button type="button" onClick={openPhotoAssistant}>
+            <span className="quick-action-icon" aria-hidden="true">✦</span>
+            <span>
+              <strong>Photo Assistant</strong>
+              <small>Ask a question</small>
+            </span>
+          </button>
+          <button type="button" onClick={openBooking}>
+            <span className="quick-action-icon" aria-hidden="true">↗</span>
+            <span>
+              <strong>Book a Session</strong>
+              <small>Start your enquiry</small>
+            </span>
+          </button>
+        </div>
+      )}
+
       {isOpen && (
         <section className="chat-assistant-panel" role="dialog" aria-label="Photography booking assistant">
           <header className="chat-assistant-header">
@@ -248,18 +288,18 @@ function ChatAssistant() {
       )}
 
       <button
-        className={`chat-assistant-toggle ${isOpen ? "is-open" : ""}`}
+        className={`chat-assistant-toggle ${isOpen || quickActionsOpen ? "is-open" : ""}`}
         type="button"
-        onClick={() => setIsOpen((open) => !open)}
-        aria-label={isOpen ? "Close photography assistant" : "Open photography assistant"}
-        aria-expanded={isOpen}
+        onClick={handleLauncherClick}
+        aria-label={isOpen || quickActionsOpen ? "Close quick actions" : "Open quick actions"}
+        aria-expanded={isOpen || quickActionsOpen}
       >
-        {isOpen ? (
+        {isOpen || quickActionsOpen ? (
           <span aria-hidden="true">×</span>
         ) : (
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M4 5.75A2.75 2.75 0 0 1 6.75 3h10.5A2.75 2.75 0 0 1 20 5.75v7.5A2.75 2.75 0 0 1 17.25 16H10l-5 4v-4.25A2.75 2.75 0 0 1 4 13.5z" />
-            <path d="M8 8h8M8 11.5h5" />
+            <path d="M12 2.8v18.4M2.8 12h18.4M5.5 5.5l13 13m0-13-13 13" />
+            <circle cx="12" cy="12" r="8.5" />
           </svg>
         )}
       </button>

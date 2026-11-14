@@ -1,6 +1,7 @@
 
 import { useApp } from "../context/AppContext";
 import EnquiryForm from "../components/enquiry/EnquiryForm";
+import MobilePageContent from "../components/common/MobilePageContent";
 
 function Contact() {
   const { settings } = useApp();
@@ -91,6 +92,26 @@ function Contact() {
           </div>
         </div>
       </section>
+
+      <MobilePageContent
+        eyebrow="MAKE AN ENQUIRY"
+        title="A few details help us get started"
+        intro="You can contact the studio even if your plans are still taking shape. Include whatever you already know."
+        points={[
+          {
+            title: "Your photography needs",
+            description: "Mention the occasion, service, or kind of images you are looking for.",
+          },
+          {
+            title: "Date and place",
+            description: "Share your preferred date and location, or let us know if either is still flexible.",
+          },
+          {
+            title: "Questions and preferences",
+            description: "Add any ideas, important moments, or questions you would like to discuss.",
+          },
+        ]}
+      />
     </div>
   );
 }

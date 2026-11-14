@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Redirecting…</title>
+  </head>
+  <body>
+    <script>
+      const basePath = "/SwarajClientProject";
+      const currentPath = window.location.pathname.startsWith(basePath)
+        ? window.location.pathname.slice(basePath.length) || "/"
+        : "/";
+      const route = `${currentPath}${window.location.search}${window.location.hash}`;
+      window.location.replace(`${basePath}/?p=${encodeURIComponent(route)}`);
+    </script>
+  </body>
+</html>

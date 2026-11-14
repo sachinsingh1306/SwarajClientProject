@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import GalleryGrid from "../components/portfolio/GalleryGrid";
 import ImageLightbox from "../components/portfolio/ImageLightbox";
+import MobilePageContent from "../components/common/MobilePageContent";
 
 function Portfolio({ navigate }) {
   const [selectedImage, setSelectedImage] = useState(null);
@@ -35,6 +36,26 @@ function Portfolio({ navigate }) {
           />
         </div>
       </section>
+
+      <MobilePageContent
+        eyebrow="EXPLORE THE WORK"
+        title="Look closer at the stories"
+        intro="Every gallery brings together a different set of people, places, and details. Open an image to view it more closely."
+        points={[
+          {
+            title: "Notice the small details",
+            description: "Expressions, gestures, light, and setting all help tell the story behind a photograph.",
+          },
+          {
+            title: "Find a style that speaks to you",
+            description: "Save or share examples that feel close to the mood you would like for your own session.",
+          },
+          {
+            title: "Use the images as a starting point",
+            description: "Tell the studio what you like about a photograph, then discuss how that inspiration might fit your plans.",
+          },
+        ]}
+      />
 
       {selectedImage && (
         <ImageLightbox

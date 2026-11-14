@@ -26,8 +26,15 @@ import ManageServices from "./admin/ManageServices";
 import ManageSettings from "./admin/ManageSettings";
 import ManageTestimonials from "./admin/ManageTestimonials";
 
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
+
 const getCurrentPath = () => {
-  return window.location.pathname;
+  const pathname = window.location.pathname;
+  const appPath = basePath && pathname.startsWith(basePath)
+    ? pathname.slice(basePath.length) || "/"
+    : pathname;
+
+  return appPath.length > 1 ? appPath.replace(/\/+$/, "") : appPath;
 };
 
 function App() {
@@ -46,7 +53,7 @@ function App() {
   }, []);
 
   const navigate = (path) => {
-    window.history.pushState({}, "", path);
+    window.history.pushState({}, "", `${basePath}${path}`);
     setPathname(getCurrentPath());
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -106,7 +113,7 @@ function App() {
       <main>{page}</main>
 
       {!isAdmin && <Footer navigate={navigate} />}
-      {!isAdmin && <ChatAssistant />}
+      {!isAdmin && <ChatAssistant navigate={navigate} />}
     </>
   );
 }
